@@ -1,0 +1,11 @@
+# Husky 훅 파일은 Git-for-Windows bash 실행을 위해 반드시 LF
+.husky/* text eol=lf
+
+# 소스 파일 LF 통일
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.js   text eol=lf
+*.mjs  text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.md   text eol=lf

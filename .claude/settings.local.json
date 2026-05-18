@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__shadcn",
+      "mcp__playwright",
+      "mcp__shrimp-task-manager",
+      "mcp__supabase"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "shadcn",
+    "playwright",
+    "supabase"
+  ]
+}
