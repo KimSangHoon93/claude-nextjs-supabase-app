@@ -100,6 +100,475 @@
       "analysisResult": "Gather Phase 1 애플리케이션 골격 구축. 코드베이스 분석 결과, 라우트 골격(Task 001)은 13개 중 12개 완료 상태이며 타입 정의(Task 002)가 미구현. 실질적 잔여 작업: (1) 미들웨어 공개 경로 추가, (2) 프론트엔드 타입 정의 파일 생성, (3) 더미 데이터 유틸리티 생성, (4) admin/login 페이지 껍데기 생성. Phase 2 UI 구현을 위한 타입과 더미 데이터 기반을 마련하는 것이 핵심 목표.",
       "summary": "lib/mock-data.ts 생성 완료. MOCK_USERS(3명), MOCK_EVENTS(4개: upcoming 2/ongoing 1/ended 1), MOCK_PARTICIPANTS(5개), MOCK_ADMIN_STATS export됨. getMockEventById, getMockEventByInviteCode, getMockParticipantsByEventId 헬퍼 함수 구현. 임시 파일 주석 명시. npm run lint 통과.",
       "completedAt": "2026-05-21T07:43:20.010Z"
+    },
+    {
+      "id": "3097b366-b27b-4d79-8711-1f22df5650f6",
+      "name": "Task 003: shadcn/ui 추가 컴포넌트 설치",
+      "description": "Task 003에 필요한 shadcn/ui 컴포넌트 8개를 설치한다. 설치 대상: avatar, dialog, sonner, select, separator, sheet, tabs, skeleton. 이 컴포넌트들은 이후 도메인 컴포넌트(EventCard, ParticipantCard 등)와 Task 004~006 페이지 UI 구현에서 사용된다.",
+      "notes": "shadcn CLI가 이미 설정된 프로젝트(components.json 존재)이므로 별도 init 불필요. 각 컴포넌트 설치 시 --overwrite 플래그 불필요(기존 파일 없음).",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2026-05-21T08:18:14.783Z",
+      "updatedAt": "2026-05-21T08:29:50.192Z",
+      "relatedFiles": [
+        {
+          "path": "components/ui/avatar.tsx",
+          "type": "CREATE",
+          "description": "Avatar, AvatarImage, AvatarFallback 컴포넌트"
+        },
+        {
+          "path": "components/ui/dialog.tsx",
+          "type": "CREATE",
+          "description": "Dialog 관련 컴포넌트"
+        },
+        {
+          "path": "components/ui/sonner.tsx",
+          "type": "CREATE",
+          "description": "Toast(Sonner) 컴포넌트"
+        },
+        {
+          "path": "components/ui/select.tsx",
+          "type": "CREATE",
+          "description": "Select 관련 컴포넌트"
+        },
+        {
+          "path": "components/ui/separator.tsx",
+          "type": "CREATE",
+          "description": "Separator 컴포넌트"
+        },
+        {
+          "path": "components/ui/sheet.tsx",
+          "type": "CREATE",
+          "description": "Sheet(드로어) 컴포넌트"
+        },
+        {
+          "path": "components/ui/tabs.tsx",
+          "type": "CREATE",
+          "description": "Tabs 관련 컴포넌트"
+        },
+        {
+          "path": "components/ui/skeleton.tsx",
+          "type": "CREATE",
+          "description": "Skeleton 로딩 컴포넌트"
+        },
+        {
+          "path": "app/layout.tsx",
+          "type": "TO_MODIFY",
+          "description": "Toaster 컴포넌트 추가"
+        }
+      ],
+      "implementationGuide": "터미널에서 순서대로 실행:\nnpx shadcn@latest add avatar\nnpx shadcn@latest add dialog\nnpx shadcn@latest add sonner\nnpx shadcn@latest add select\nnpx shadcn@latest add separator\nnpx shadcn@latest add sheet\nnpx shadcn@latest add tabs\nnpx shadcn@latest add skeleton\n\n각 설치 후 components/ui/ 하위에 해당 파일이 생성되었는지 확인.\nsonner 설치 후 app/layout.tsx에 Toaster 컴포넌트 추가:\nimport { Toaster } from '@/components/ui/sonner'\n루트 레이아웃 body 내부에 <Toaster /> 삽입",
+      "verificationCriteria": "1. components/ui/ 하위에 8개 파일 모두 존재\n2. app/layout.tsx에 <Toaster /> 추가됨\n3. npm run build 또는 npm run dev 실행 시 타입 에러 없음",
+      "analysisResult": "Task 003: Phase 2 공통 컴포넌트 라이브러리 구현\\n\\n목표: Task 004(주최자 UI), Task 005(참여자 UI), Task 006(관리자 UI)에서 재사용할 도메인 공통 컴포넌트를 먼저 구현한다.\\n\\n기술 스택: Next.js 15 App Router, TypeScript, Tailwind CSS v4, shadcn/ui(new-york 스타일), lucide-react\\n\\n핵심 결정사항:\\n1. components/gather/ 디렉토리에 도메인 컴포넌트 분리\\n2. EventCard는 href prop 사용 → 서버 컴포넌트 유지\\n3. 기존 emerald-500 색상 팔레트 유지\\n4. types/gather.ts 타입 재사용, lib/mock-data.ts 유틸리티 함수 보완\\n5. 한글 주석 필수 (프로젝트 규칙)",
+      "summary": "avatar, dialog, sonner, select, separator, sheet, tabs, skeleton 8개 컴포넌트 모두 components/ui/ 하위에 설치 완료. app/layout.tsx에 Toaster import 및 ThemeProvider 내부에 삽입 완료. 모든 검증 기준 충족.",
+      "completedAt": "2026-05-21T08:29:50.187Z"
+    },
+    {
+      "id": "5e9c12e3-6802-4e90-bcd6-fdd997c026de",
+      "name": "Task 004: mock-data.ts 유틸리티 함수 보완",
+      "description": "Task 004~005의 주최자/참여자 이벤트 목록 페이지에서 필요한 유틸리티 함수를 lib/mock-data.ts에 추가한다. 현재 getMockEventById, getMockEventByInviteCode, getMockParticipantsByEventId 3개 함수만 존재하며, 사용자 기준 이벤트 목록 조회 함수가 없다.",
+      "notes": "한글 주석 필수. 기존 함수 스타일(export function + 타입 명시) 그대로 유지.",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2026-05-21T08:18:14.783Z",
+      "updatedAt": "2026-05-21T08:30:24.839Z",
+      "relatedFiles": [
+        {
+          "path": "lib/mock-data.ts",
+          "type": "TO_MODIFY",
+          "description": "유틸리티 함수 3개 추가",
+          "lineStart": 151,
+          "lineEnd": 166
+        },
+        {
+          "path": "types/gather.ts",
+          "type": "REFERENCE",
+          "description": "GatherEvent, GatherParticipant 타입 참조"
+        }
+      ],
+      "implementationGuide": "lib/mock-data.ts에 아래 3개 함수 추가:\n\ngetMockEventsByUserId(userId: string): GatherEvent[]\n  MOCK_PARTICIPANTS에서 userId 일치하는 항목의 eventId 추출\n  MOCK_EVENTS에서 해당 eventId 필터링 후 반환\n\ngetMockHostedEventsByUserId(userId: string): GatherEvent[]\n  MOCK_PARTICIPANTS에서 userId 일치 && role === 'host'인 항목의 eventId 추출\n  MOCK_EVENTS 필터링 후 반환\n\ngetMockJoinedEventsByUserId(userId: string): GatherEvent[]\n  MOCK_PARTICIPANTS에서 userId 일치 && role === 'participant'인 항목의 eventId 추출\n  MOCK_EVENTS 필터링 후 반환",
+      "verificationCriteria": "1. getMockEventsByUserId('user-1') 호출 시 evt-1, evt-3 반환\n2. getMockHostedEventsByUserId('user-1') 호출 시 evt-1만 반환\n3. getMockJoinedEventsByUserId('user-1') 호출 시 evt-3만 반환\n4. TypeScript 타입 에러 없음",
+      "analysisResult": "Task 003: Phase 2 공통 컴포넌트 라이브러리 구현\\n\\n목표: Task 004(주최자 UI), Task 005(참여자 UI), Task 006(관리자 UI)에서 재사용할 도메인 공통 컴포넌트를 먼저 구현한다.\\n\\n기술 스택: Next.js 15 App Router, TypeScript, Tailwind CSS v4, shadcn/ui(new-york 스타일), lucide-react\\n\\n핵심 결정사항:\\n1. components/gather/ 디렉토리에 도메인 컴포넌트 분리\\n2. EventCard는 href prop 사용 → 서버 컴포넌트 유지\\n3. 기존 emerald-500 색상 팔레트 유지\\n4. types/gather.ts 타입 재사용, lib/mock-data.ts 유틸리티 함수 보완\\n5. 한글 주석 필수 (프로젝트 규칙)",
+      "summary": "getMockEventsByUserId, getMockHostedEventsByUserId, getMockJoinedEventsByUserId 3개 함수 추가 완료. user-1 기준으로 전체(evt-1, evt-3), 주최(evt-1), 참여(evt-3) 정확히 반환. 한글 주석 적용, 기존 스타일 유지.",
+      "completedAt": "2026-05-21T08:30:24.834Z"
+    },
+    {
+      "id": "dfc5f00d-6fe8-49bb-8281-38c1852adb98",
+      "name": "Task 005: EventCard 컴포넌트 구현",
+      "description": "이벤트 목록에서 사용되는 EventCard 서버 컴포넌트를 구현한다. GatherEvent 타입 기반으로 이벤트 제목, 날짜, 장소, 참여자 수, 상태 배지를 표시한다. href prop으로 클릭 시 이동할 경로를 받아 서버 컴포넌트를 유지한다.",
+      "notes": "서버 컴포넌트이므로 'use client' 불필요. types/gather.ts의 기존 EventCardProps는 onClick 기반이므로 이 컴포넌트는 별도 Props 인터페이스 정의. 아이콘 크기 16px, text-muted-foreground 색상.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "3097b366-b27b-4d79-8711-1f22df5650f6"
+        }
+      ],
+      "createdAt": "2026-05-21T08:18:14.783Z",
+      "updatedAt": "2026-05-21T08:31:01.793Z",
+      "relatedFiles": [
+        {
+          "path": "components/gather/event-card.tsx",
+          "type": "CREATE",
+          "description": "EventCard 서버 컴포넌트"
+        },
+        {
+          "path": "components/ui/card.tsx",
+          "type": "DEPENDENCY",
+          "description": "Card, CardContent 사용"
+        },
+        {
+          "path": "components/ui/badge.tsx",
+          "type": "DEPENDENCY",
+          "description": "Badge 상태 표시 사용"
+        },
+        {
+          "path": "types/gather.ts",
+          "type": "REFERENCE",
+          "description": "GatherEvent, EventStatus 타입 참조"
+        },
+        {
+          "path": "lib/utils.ts",
+          "type": "DEPENDENCY",
+          "description": "cn() 함수 사용"
+        }
+      ],
+      "implementationGuide": "파일: components/gather/event-card.tsx\n\nProps 인터페이스:\n  event: GatherEvent\n  href: string (클릭 시 이동 경로)\n\n컴포넌트 구조 (pseudocode):\n  Link href={href} className='block'\n    Card className='hover:shadow-md transition-shadow'\n      CardContent className='p-4'\n        상단 행: title(font-semibold truncate) + StatusBadge\n        하단 행들:\n          CalendarDays 아이콘 + 날짜(ko-KR 포맷)\n          MapPin 아이콘 + location(truncate)\n          Users 아이콘 + participantCount + '명'\n\nStatusBadge 내부 헬퍼 함수:\n  upcoming → Badge variant='secondary' + '예정'\n  ongoing  → Badge className='bg-emerald-500 text-white' + '진행중'\n  ended    → Badge variant='outline' className='text-muted-foreground' + '종료'\n\n날짜 포맷:\n  new Intl.DateTimeFormat('ko-KR', {month:'long', day:'numeric', weekday:'short', hour:'2-digit', minute:'2-digit'})",
+      "verificationCriteria": "1. upcoming/ongoing/ended 이벤트별 배지 색상 정확히 표시\n2. 날짜가 '6월 10일 (화) 오후 12:00' 형식으로 표시\n3. TypeScript 타입 에러 없음\n4. 다크 모드에서 카드 배경/텍스트 정상 표시",
+      "analysisResult": "Task 003: Phase 2 공통 컴포넌트 라이브러리 구현\\n\\n목표: Task 004(주최자 UI), Task 005(참여자 UI), Task 006(관리자 UI)에서 재사용할 도메인 공통 컴포넌트를 먼저 구현한다.\\n\\n기술 스택: Next.js 15 App Router, TypeScript, Tailwind CSS v4, shadcn/ui(new-york 스타일), lucide-react\\n\\n핵심 결정사항:\\n1. components/gather/ 디렉토리에 도메인 컴포넌트 분리\\n2. EventCard는 href prop 사용 → 서버 컴포넌트 유지\\n3. 기존 emerald-500 색상 팔레트 유지\\n4. types/gather.ts 타입 재사용, lib/mock-data.ts 유틸리티 함수 보완\\n5. 한글 주석 필수 (프로젝트 규칙)",
+      "summary": "components/gather/event-card.tsx 서버 컴포넌트 구현 완료. GatherEvent + href prop, StatusBadge 헬퍼(upcoming/ongoing/ended 색상 분기), Intl.DateTimeFormat ko-KR 날짜 포맷, lucide-react 아이콘 16px, emerald-500 진행중 배지 적용. 'use client' 없는 순수 서버 컴포넌트.",
+      "completedAt": "2026-05-21T08:31:01.790Z"
+    },
+    {
+      "id": "800028e0-b614-43b0-b7b7-d479446c490b",
+      "name": "Task 006: ParticipantCard 컴포넌트 구현",
+      "description": "참여자 목록에서 사용되는 ParticipantCard 서버 컴포넌트를 구현한다. GatherParticipant 타입 기반으로 아바타, 이름, 역할(주최자/참여자) 배지를 표시한다.",
+      "notes": "Avatar 컴포넌트는 이전 태스크에서 설치된 components/ui/avatar.tsx 사용. participant.user가 undefined일 수 있으므로 옵셔널 체이닝 필수.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "3097b366-b27b-4d79-8711-1f22df5650f6"
+        }
+      ],
+      "createdAt": "2026-05-21T08:18:14.783Z",
+      "updatedAt": "2026-05-21T08:31:23.655Z",
+      "relatedFiles": [
+        {
+          "path": "components/gather/participant-card.tsx",
+          "type": "CREATE",
+          "description": "ParticipantCard 서버 컴포넌트"
+        },
+        {
+          "path": "components/ui/avatar.tsx",
+          "type": "DEPENDENCY",
+          "description": "Avatar, AvatarImage, AvatarFallback 사용"
+        },
+        {
+          "path": "components/ui/badge.tsx",
+          "type": "DEPENDENCY",
+          "description": "Badge 역할 표시 사용"
+        },
+        {
+          "path": "types/gather.ts",
+          "type": "REFERENCE",
+          "description": "GatherParticipant, ParticipantRole 타입 참조"
+        }
+      ],
+      "implementationGuide": "파일: components/gather/participant-card.tsx\n\nProps 인터페이스:\n  participant: GatherParticipant\n\n컴포넌트 구조 (pseudocode):\n  div className='flex items-center gap-3 py-3 min-h-[48px]'\n    Avatar className='h-10 w-10'\n      AvatarImage src={participant.user?.avatarUrl || undefined}\n      AvatarFallback: user.name 첫 글자 (없으면 '?')\n    div className='flex-1 min-w-0'\n      p className='font-medium truncate': user.name (없으면 '알 수 없음')\n    RoleBadge\n\nRoleBadge 내부 헬퍼:\n  host        → Badge className='bg-emerald-500 text-white text-xs' + '주최자'\n  participant → Badge variant='secondary' className='text-xs' + '참여자'",
+      "verificationCriteria": "1. host 역할은 '주최자' 에메랄드 배지 표시\n2. participant 역할은 '참여자' secondary 배지 표시\n3. avatarUrl 없으면 이름 첫 글자 Fallback 표시\n4. 터치 영역 최소 48px (min-h-[48px]) 확인\n5. TypeScript 타입 에러 없음",
+      "analysisResult": "Task 003: Phase 2 공통 컴포넌트 라이브러리 구현\\n\\n목표: Task 004(주최자 UI), Task 005(참여자 UI), Task 006(관리자 UI)에서 재사용할 도메인 공통 컴포넌트를 먼저 구현한다.\\n\\n기술 스택: Next.js 15 App Router, TypeScript, Tailwind CSS v4, shadcn/ui(new-york 스타일), lucide-react\\n\\n핵심 결정사항:\\n1. components/gather/ 디렉토리에 도메인 컴포넌트 분리\\n2. EventCard는 href prop 사용 → 서버 컴포넌트 유지\\n3. 기존 emerald-500 색상 팔레트 유지\\n4. types/gather.ts 타입 재사용, lib/mock-data.ts 유틸리티 함수 보완\\n5. 한글 주석 필수 (프로젝트 규칙)",
+      "summary": "components/gather/participant-card.tsx 서버 컴포넌트 구현 완료. GatherParticipant 타입, Avatar/AvatarImage/AvatarFallback, RoleBadge 헬퍼(host→emerald/participant→secondary), min-h-[48px] 터치 영역, user 옵셔널 체이닝 처리 완료.",
+      "completedAt": "2026-05-21T08:31:23.648Z"
+    },
+    {
+      "id": "71548fc3-391a-49d7-9eaf-100703c24f8e",
+      "name": "Task 007: Skeleton 및 EmptyState 컴포넌트 구현",
+      "description": "로딩 중 표시할 스켈레톤 컴포넌트(EventCardSkeleton, ParticipantCardSkeleton)와 데이터가 없을 때 표시할 EmptyState 컴포넌트를 구현한다.",
+      "notes": "skeletons.tsx에서 EventCardSkeleton, ParticipantCardSkeleton 모두 export. EmptyState의 icon prop 타입은 lucide-react의 LucideIcon (import type { LucideIcon } from 'lucide-react').",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "3097b366-b27b-4d79-8711-1f22df5650f6"
+        }
+      ],
+      "createdAt": "2026-05-21T08:18:14.783Z",
+      "updatedAt": "2026-05-21T08:31:56.928Z",
+      "relatedFiles": [
+        {
+          "path": "components/gather/skeletons.tsx",
+          "type": "CREATE",
+          "description": "EventCardSkeleton, ParticipantCardSkeleton"
+        },
+        {
+          "path": "components/gather/empty-state.tsx",
+          "type": "CREATE",
+          "description": "EmptyState 컴포넌트"
+        },
+        {
+          "path": "components/ui/skeleton.tsx",
+          "type": "DEPENDENCY",
+          "description": "Skeleton 기반 컴포넌트"
+        },
+        {
+          "path": "components/ui/card.tsx",
+          "type": "DEPENDENCY",
+          "description": "EventCardSkeleton 카드 래퍼"
+        },
+        {
+          "path": "components/ui/button.tsx",
+          "type": "DEPENDENCY",
+          "description": "EmptyState 액션 버튼"
+        }
+      ],
+      "implementationGuide": "파일 1: components/gather/skeletons.tsx\n\nEventCardSkeleton (pseudocode):\n  Card className=''\n    CardContent className='p-4 space-y-3'\n      상단 행: Skeleton className='h-5 w-3/4' + Skeleton className='h-5 w-16'\n      Skeleton className='h-4 w-1/2'\n      Skeleton className='h-4 w-2/3'\n\nParticipantCardSkeleton (pseudocode):\n  div className='flex items-center gap-3 py-3'\n    Skeleton className='h-10 w-10 rounded-full'\n    div className='flex-1 space-y-2'\n      Skeleton className='h-4 w-24'\n    Skeleton className='h-5 w-12'\n\n파일 2: components/gather/empty-state.tsx\n\nProps 인터페이스:\n  icon: LucideIcon\n  title: string\n  description?: string\n  action?: { label: string; href: string }\n\n컴포넌트 구조 (pseudocode):\n  div className='flex flex-col items-center justify-center py-16 gap-3 text-center'\n    Icon size={48} className='text-muted-foreground'\n    p className='font-semibold text-lg': title\n    p className='text-sm text-muted-foreground': description (있을 때만)\n    Button asChild variant='outline' (action 있을 때만)\n      Link href={action.href}: action.label",
+      "verificationCriteria": "1. EventCardSkeleton이 EventCard와 동일한 카드 높이 유지\n2. ParticipantCardSkeleton이 ParticipantCard 레이아웃과 일치\n3. EmptyState action prop 없으면 버튼 미표시\n4. EmptyState action prop 있으면 Link로 연결된 버튼 표시\n5. TypeScript 타입 에러 없음",
+      "analysisResult": "Task 003: Phase 2 공통 컴포넌트 라이브러리 구현\\n\\n목표: Task 004(주최자 UI), Task 005(참여자 UI), Task 006(관리자 UI)에서 재사용할 도메인 공통 컴포넌트를 먼저 구현한다.\\n\\n기술 스택: Next.js 15 App Router, TypeScript, Tailwind CSS v4, shadcn/ui(new-york 스타일), lucide-react\\n\\n핵심 결정사항:\\n1. components/gather/ 디렉토리에 도메인 컴포넌트 분리\\n2. EventCard는 href prop 사용 → 서버 컴포넌트 유지\\n3. 기존 emerald-500 색상 팔레트 유지\\n4. types/gather.ts 타입 재사용, lib/mock-data.ts 유틸리티 함수 보완\\n5. 한글 주석 필수 (프로젝트 규칙)",
+      "summary": "skeletons.tsx에 EventCardSkeleton·ParticipantCardSkeleton 구현, empty-state.tsx에 EmptyState 구현 완료. EventCard·ParticipantCard 레이아웃과 일치하는 스켈레톤, action prop 유무에 따른 버튼 조건부 렌더링, LucideIcon 타입 적용, TypeScript 에러 없음.",
+      "completedAt": "2026-05-21T08:31:56.924Z"
+    },
+    {
+      "id": "a380c537-708e-484d-845e-f5550dac0d09",
+      "name": "Task 008: React Hook Form + Zod 설치 및 이벤트 폼 스키마 정의",
+      "description": "react-hook-form, @hookform/resolvers, zod 패키지를 설치하고, 이벤트 생성/수정 폼에서 공통으로 사용할 Zod 검증 스키마를 lib/validations/event.ts에 정의한다. 이 스키마는 Phase 3 Server Action에서도 재사용된다.",
+      "notes": "zod는 이미 @hookform/resolvers의 peer dependency이므로 별도 버전 충돌 없음. lib/validations/ 디렉토리 신규 생성.",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2026-05-21T08:42:22.453Z",
+      "updatedAt": "2026-05-21T08:44:37.793Z",
+      "relatedFiles": [
+        {
+          "path": "package.json",
+          "type": "TO_MODIFY",
+          "description": "react-hook-form, @hookform/resolvers, zod 의존성 추가"
+        },
+        {
+          "path": "lib/validations/event.ts",
+          "type": "CREATE",
+          "description": "이벤트 폼 Zod 스키마 및 타입 정의"
+        }
+      ],
+      "implementationGuide": "1. npm install react-hook-form @hookform/resolvers zod\n2. lib/validations/event.ts 생성:\n   - eventSchema: z.object({ title: z.string().min(1,'제목을 입력해주세요').max(100), location: z.string().min(1,'장소를 입력해주세요'), eventDate: z.string().min(1,'날짜를 선택해주세요'), description: z.string().optional() })\n   - export type EventFormValues = z.infer<typeof eventSchema>\n3. tsconfig 이상 없는지 확인 (npx tsc --noEmit)",
+      "verificationCriteria": "1. package.json에 react-hook-form, @hookform/resolvers, zod 추가 확인\n2. lib/validations/event.ts에 eventSchema, EventFormValues export 확인\n3. npx tsc --noEmit 타입 에러 없음",
+      "analysisResult": "ROADMAP Task 004 주최자 모바일 UI/UX 완성: 더미 데이터(lib/mock-data.ts) 기반으로 5개 placeholder 페이지를 완성하고 React Hook Form + Zod를 설치한다. 서버 컴포넌트 우선, 인터랙션 필요 시 클라이언트 컴포넌트 분리, emerald-500 색상 팔레트 유지, 한글 주석 필수. userId='user-1' 하드코딩으로 더미 모드 동작. Phase 3에서 실제 인증/DB 연동 예정.",
+      "summary": "react-hook-form, @hookform/resolvers, zod 설치 완료. lib/validations/event.ts에 eventSchema(title/location/eventDate/description)와 EventFormValues 타입 export. TypeScript 에러 없음.",
+      "completedAt": "2026-05-21T08:44:37.787Z"
+    },
+    {
+      "id": "ccf6ba98-adae-4cef-9d66-725e67df981e",
+      "name": "Task 009: 내 이벤트 목록 페이지 구현",
+      "description": "app/protected/events/page.tsx를 완성한다. shadcn/ui Tabs로 '주최한 이벤트'와 '참여한 이벤트'를 분리하고, 각 탭에 EventCard 목록 또는 EmptyState를 표시한다. userId='user-1' 하드코딩으로 더미 데이터를 사용한다.",
+      "notes": "Tabs 컴포넌트는 클라이언트 상태를 사용하므로 페이지 전체를 'use client'로 설정. 더미 데이터는 동기적이므로 Suspense 불필요.",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2026-05-21T08:42:22.453Z",
+      "updatedAt": "2026-05-21T08:44:59.240Z",
+      "relatedFiles": [
+        {
+          "path": "app/protected/events/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "placeholder → 완성된 이벤트 목록 페이지"
+        },
+        {
+          "path": "components/gather/event-card.tsx",
+          "type": "DEPENDENCY",
+          "description": "EventCard 컴포넌트 재사용"
+        },
+        {
+          "path": "components/gather/empty-state.tsx",
+          "type": "DEPENDENCY",
+          "description": "EmptyState 컴포넌트 재사용"
+        },
+        {
+          "path": "lib/mock-data.ts",
+          "type": "DEPENDENCY",
+          "description": "getMockHostedEventsByUserId, getMockJoinedEventsByUserId 사용"
+        },
+        {
+          "path": "components/ui/tabs.tsx",
+          "type": "DEPENDENCY",
+          "description": "Tabs, TabsList, TabsTrigger, TabsContent 사용"
+        }
+      ],
+      "implementationGuide": "'use client' 페이지 컴포넌트:\n- const MOCK_USER_ID = 'user-1'\n- hostedEvents = getMockHostedEventsByUserId(MOCK_USER_ID)\n- joinedEvents = getMockJoinedEventsByUserId(MOCK_USER_ID)\n- Tabs defaultValue='hosted'\n  - TabsList: TabsTrigger('hosted','주최한 이벤트 N개'), TabsTrigger('joined','참여한 이벤트 N개')\n  - TabsContent('hosted'):\n    - hostedEvents.length === 0 → EmptyState(CalendarDays, '주최한 이벤트가 없어요', '이벤트를 만들어 친구들을 초대해보세요', action={label:'이벤트 만들기', href:'/protected/events/new'})\n    - map → EventCard(event, href='/protected/events/{id}')\n  - TabsContent('joined'):\n    - joinedEvents.length === 0 → EmptyState(Users, '참여한 이벤트가 없어요', '초대 링크로 이벤트에 참여해보세요')\n    - map → EventCard(event, href='/protected/events/{id}')\n- 외부 div: className='p-4 space-y-3'",
+      "verificationCriteria": "1. '주최한 이벤트' 탭: user-1이 host인 evt-1 EventCard 표시\n2. '참여한 이벤트' 탭: user-1이 participant인 evt-3 EventCard 표시\n3. 각 탭 제목에 이벤트 수 표시\n4. 다크 모드에서 카드 정상 표시",
+      "analysisResult": "ROADMAP Task 004 주최자 모바일 UI/UX 완성: 더미 데이터(lib/mock-data.ts) 기반으로 5개 placeholder 페이지를 완성하고 React Hook Form + Zod를 설치한다. 서버 컴포넌트 우선, 인터랙션 필요 시 클라이언트 컴포넌트 분리, emerald-500 색상 팔레트 유지, 한글 주석 필수. userId='user-1' 하드코딩으로 더미 모드 동작. Phase 3에서 실제 인증/DB 연동 예정.",
+      "summary": "events/page.tsx 완성. Tabs(주최/참여) + EventCard 목록 + EmptyState 구현. user-1 기준 주최 이벤트(evt-1), 참여 이벤트(evt-3) 각 탭에 표시. 탭 헤더에 이벤트 수 표시. MOCK_USER_ID 상수화.",
+      "completedAt": "2026-05-21T08:44:59.235Z"
+    },
+    {
+      "id": "141367fd-eb22-4a31-bd6b-577033cc74e9",
+      "name": "Task 010: EventForm 공용 컴포넌트 및 이벤트 생성 페이지 구현",
+      "description": "components/gather/event-form.tsx에 React Hook Form + Zod 기반 공용 폼 클라이언트 컴포넌트를 구현하고, app/protected/events/new/page.tsx를 완성한다. 제출 시 토스트 알림 표시 후 이벤트 목록으로 이동한다.",
+      "notes": "FormLabel, FormMessage 등 shadcn/ui form 컴포넌트가 없으면 직접 label+p로 구현해도 무방. eventDate는 datetime-local input 사용. 더미 모드에서는 실제 저장 없이 toast만 표시.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "a380c537-708e-484d-845e-f5550dac0d09"
+        }
+      ],
+      "createdAt": "2026-05-21T08:42:22.453Z",
+      "updatedAt": "2026-05-21T08:46:36.496Z",
+      "relatedFiles": [
+        {
+          "path": "components/gather/event-form.tsx",
+          "type": "CREATE",
+          "description": "공용 이벤트 폼 클라이언트 컴포넌트"
+        },
+        {
+          "path": "app/protected/events/new/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "placeholder → 이벤트 생성 페이지"
+        },
+        {
+          "path": "lib/validations/event.ts",
+          "type": "DEPENDENCY",
+          "description": "eventSchema, EventFormValues 사용"
+        },
+        {
+          "path": "components/ui/input.tsx",
+          "type": "DEPENDENCY",
+          "description": "제목, 장소, 날짜 입력 필드"
+        },
+        {
+          "path": "components/ui/textarea.tsx",
+          "type": "DEPENDENCY",
+          "description": "설명 입력 필드"
+        },
+        {
+          "path": "components/ui/button.tsx",
+          "type": "DEPENDENCY",
+          "description": "제출 버튼"
+        }
+      ],
+      "implementationGuide": "components/gather/event-form.tsx ('use client'):\n- Props: { mode: 'create'|'edit', defaultValues?: EventFormValues, onSubmit?: (data: EventFormValues) => void }\n- useForm({ resolver: zodResolver(eventSchema), defaultValues })\n- 필드: title(Input), location(Input), eventDate(Input type='datetime-local'), description(Textarea, optional)\n- 각 필드에 FormLabel, FormMessage(에러 표시)\n- 제출 버튼: mode==='create' ? '이벤트 만들기' : '수정 완료'\n- handleSubmit: 더미 모드 → toast('이벤트가 생성되었습니다') + router.push('/protected/events')\n\napp/protected/events/new/page.tsx (서버 컴포넌트):\n- 헤더: '새 이벤트 만들기'\n- EventForm mode='create' 렌더링\n- div className='p-4'로 감싸기",
+      "verificationCriteria": "1. 빈 제목으로 제출 시 '제목을 입력해주세요' 에러 메시지 표시\n2. 빈 장소로 제출 시 '장소를 입력해주세요' 에러 메시지 표시\n3. 유효한 데이터 제출 시 toast 표시 후 /protected/events 이동\n4. description 필드는 비워도 제출 가능",
+      "analysisResult": "ROADMAP Task 004 주최자 모바일 UI/UX 완성: 더미 데이터(lib/mock-data.ts) 기반으로 5개 placeholder 페이지를 완성하고 React Hook Form + Zod를 설치한다. 서버 컴포넌트 우선, 인터랙션 필요 시 클라이언트 컴포넌트 분리, emerald-500 색상 팔레트 유지, 한글 주석 필수. userId='user-1' 하드코딩으로 더미 모드 동작. Phase 3에서 실제 인증/DB 연동 예정.",
+      "summary": "EventForm 공용 컴포넌트(create/edit mode, zodResolver, 에러 메시지, emerald 제출 버튼) 및 이벤트 생성 페이지 구현 완료. 빈 필드 유효성 검사, 더미 toast 처리, TypeScript 에러 없음.",
+      "completedAt": "2026-05-21T08:46:36.490Z"
+    },
+    {
+      "id": "347964e4-dfb6-4de9-acd3-b35e982b42b8",
+      "name": "Task 011: 이벤트 상세 페이지 구현 (주최자 뷰)",
+      "description": "app/protected/events/[id]/page.tsx를 완성한다. 이벤트 정보, 참여자 목록, 초대 링크 복사 버튼, 수정/삭제 액션을 표시한다. 초대 링크 복사는 클라이언트 컴포넌트로 분리한다.",
+      "notes": "StatusBadge는 event-card.tsx 내부에 있으므로 별도 export하거나 인라인으로 재구현. 삭제 버튼은 더미 모드이므로 클라이언트 버튼으로 toast만 표시. isHost 판별은 userId='user-1' 하드코딩.",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2026-05-21T08:42:22.453Z",
+      "updatedAt": "2026-05-21T08:45:38.385Z",
+      "relatedFiles": [
+        {
+          "path": "app/protected/events/[id]/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "placeholder → 이벤트 상세 페이지"
+        },
+        {
+          "path": "components/gather/invite-copy-button.tsx",
+          "type": "CREATE",
+          "description": "초대 링크 복사 클라이언트 컴포넌트"
+        },
+        {
+          "path": "components/gather/participant-card.tsx",
+          "type": "DEPENDENCY",
+          "description": "ParticipantCard 재사용"
+        },
+        {
+          "path": "lib/mock-data.ts",
+          "type": "DEPENDENCY",
+          "description": "getMockEventById, getMockParticipantsByEventId 사용"
+        },
+        {
+          "path": "components/ui/separator.tsx",
+          "type": "DEPENDENCY",
+          "description": "섹션 구분선"
+        },
+        {
+          "path": "components/ui/badge.tsx",
+          "type": "DEPENDENCY",
+          "description": "상태 배지"
+        }
+      ],
+      "implementationGuide": "components/gather/invite-copy-button.tsx ('use client'):\n- Props: { inviteCode: string }\n- handleCopy: navigator.clipboard.writeText(window.location.origin + '/invite/' + inviteCode) → toast('초대 링크가 복사되었습니다')\n- Button variant='outline' + Copy 아이콘 + '초대 링크 복사'\n\napp/protected/events/[id]/page.tsx (서버 컴포넌트):\n- params: { id: string }\n- event = getMockEventById(params.id) → if(!event) notFound()\n- participants = getMockParticipantsByEventId(params.id)\n- isHost: participants.some(p => p.userId === 'user-1' && p.role === 'host')\n- 레이아웃 (div className='p-4 space-y-6'):\n  - 섹션1: 이벤트 정보 (제목, StatusBadge, 날짜/장소/설명)\n  - 섹션2: 참여자 목록 (Separator 위에, '참여자 N명' 제목, ParticipantCard 목록)\n  - 섹션3 (isHost일 때): InviteCopyButton, Link to edit(Button variant='outline'), 삭제 버튼(더미, toast('더미 모드'))\n- notFound() import from 'next/navigation'",
+      "verificationCriteria": "1. /protected/events/evt-1 접근 시 '팀 점심 모임' 이벤트 정보 표시\n2. 참여자 3명(김주최, 이참여, 박길동) ParticipantCard 표시\n3. user-1이 host인 경우 초대 링크 복사, 수정, 삭제 버튼 표시\n4. 존재하지 않는 ID 접근 시 404 페이지\n5. 초대 링크 복사 클릭 시 toast 표시",
+      "analysisResult": "ROADMAP Task 004 주최자 모바일 UI/UX 완성: 더미 데이터(lib/mock-data.ts) 기반으로 5개 placeholder 페이지를 완성하고 React Hook Form + Zod를 설치한다. 서버 컴포넌트 우선, 인터랙션 필요 시 클라이언트 컴포넌트 분리, emerald-500 색상 팔레트 유지, 한글 주석 필수. userId='user-1' 하드코딩으로 더미 모드 동작. Phase 3에서 실제 인증/DB 연동 예정.",
+      "summary": "이벤트 상세 페이지 완성. InviteCopyButton 클라이언트 컴포넌트 분리, 이벤트 정보/참여자 목록/주최자 액션(초대복사/수정/삭제) 섹션 구현. isHost 판별, notFound() 처리, TypeScript 에러 없음.",
+      "completedAt": "2026-05-21T08:45:38.382Z"
+    },
+    {
+      "id": "9d1a1869-2b49-4991-82aa-a260057f6234",
+      "name": "Task 012: 이벤트 수정 페이지 구현",
+      "description": "app/protected/events/[id]/edit/page.tsx를 완성한다. getMockEventById로 기존 이벤트 데이터를 가져와 EventForm에 defaultValues로 전달하여 프리필된 수정 폼을 표시한다.",
+      "notes": "eventDate는 datetime-local input 형식(YYYY-MM-DDTHH:mm)에 맞게 slice(0,16) 처리. EventForm의 onSubmit 동작이 mode에 따라 분기되어야 함.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "141367fd-eb22-4a31-bd6b-577033cc74e9"
+        }
+      ],
+      "createdAt": "2026-05-21T08:42:22.453Z",
+      "updatedAt": "2026-05-21T08:46:58.133Z",
+      "relatedFiles": [
+        {
+          "path": "app/protected/events/[id]/edit/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "placeholder → 이벤트 수정 페이지"
+        },
+        {
+          "path": "components/gather/event-form.tsx",
+          "type": "DEPENDENCY",
+          "description": "EventForm 재사용 (mode='edit')"
+        },
+        {
+          "path": "lib/mock-data.ts",
+          "type": "DEPENDENCY",
+          "description": "getMockEventById 사용"
+        }
+      ],
+      "implementationGuide": "app/protected/events/[id]/edit/page.tsx (서버 컴포넌트):\n- params: { id: string }\n- event = getMockEventById(params.id) → if(!event) notFound()\n- defaultValues: { title: event.title, location: event.location, eventDate: event.eventDate.slice(0,16), description: event.description ?? '' }\n- 렌더링:\n  - div className='p-4'\n  - h1 '이벤트 수정'\n  - EventForm mode='edit' defaultValues={defaultValues}\n- EventForm 내부 수정 완료 핸들러: toast('이벤트가 수정되었습니다') + router.back()\n  - mode prop으로 분기: 'edit'이면 router.back(), 'create'이면 router.push('/protected/events')",
+      "verificationCriteria": "1. /protected/events/evt-1/edit 접근 시 '팀 점심 모임' 데이터가 폼에 프리필\n2. 수정 완료 제출 시 toast('이벤트가 수정되었습니다') 표시\n3. 존재하지 않는 ID 접근 시 404 페이지\n4. 폼 유효성 검사 동작 확인",
+      "analysisResult": "ROADMAP Task 004 주최자 모바일 UI/UX 완성: 더미 데이터(lib/mock-data.ts) 기반으로 5개 placeholder 페이지를 완성하고 React Hook Form + Zod를 설치한다. 서버 컴포넌트 우선, 인터랙션 필요 시 클라이언트 컴포넌트 분리, emerald-500 색상 팔레트 유지, 한글 주석 필수. userId='user-1' 하드코딩으로 더미 모드 동작. Phase 3에서 실제 인증/DB 연동 예정.",
+      "summary": "이벤트 수정 페이지 구현 완료. getMockEventById로 데이터 조회 후 EventForm에 defaultValues 프리필(eventDate slice(0,16) 처리), notFound() 처리, mode='edit'으로 수정 toast+router.back() 동작. TypeScript 에러 없음.",
+      "completedAt": "2026-05-21T08:46:58.129Z"
+    },
+    {
+      "id": "e5a1a4cb-78de-4342-815c-fd915b92cd6d",
+      "name": "Task 013: 프로필 페이지 UI 개선",
+      "description": "app/protected/profile/page.tsx의 레이아웃을 모바일 컨테이너에 맞게 개선한다. 기존 Supabase ProfileForm 연동은 유지하면서, 패딩/간격 등 스타일을 protected/layout.tsx 패턴에 맞춘다. LogoutButton 위치도 확인 및 개선한다.",
+      "notes": "profile/page.tsx는 실제 Supabase 연동 중이므로 데이터 로직 변경 금지. 스타일/레이아웃만 개선. LogoutButton이 이미 있으므로 import해서 사용.",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2026-05-21T08:42:22.453Z",
+      "updatedAt": "2026-05-21T08:45:59.960Z",
+      "relatedFiles": [
+        {
+          "path": "app/protected/profile/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "레이아웃 스타일 개선"
+        },
+        {
+          "path": "components/profile-form.tsx",
+          "type": "DEPENDENCY",
+          "description": "기존 ProfileForm 유지"
+        },
+        {
+          "path": "components/logout-button.tsx",
+          "type": "DEPENDENCY",
+          "description": "로그아웃 버튼 추가"
+        },
+        {
+          "path": "components/ui/separator.tsx",
+          "type": "DEPENDENCY",
+          "description": "프로필과 로그아웃 섹션 구분"
+        },
+        {
+          "path": "app/protected/layout.tsx",
+          "type": "REFERENCE",
+          "description": "모바일 컨테이너 패턴 참조"
+        }
+      ],
+      "implementationGuide": "app/protected/profile/page.tsx 수정:\n- 기존: div className='flex w-full max-w-2xl flex-1 flex-col gap-8' → 모바일 레이아웃과 맞지 않음\n- 변경: div className='p-4 space-y-6'\n- h1 '프로필' (text-xl font-bold)\n- ProfileForm 유지\n- 하단 로그아웃 영역: Separator + LogoutButton\n- LogoutButton import 확인 (components/logout-button.tsx 존재)\n- 더미 사용자 정보 표시 불필요 (실제 Supabase 연동 중)",
+      "verificationCriteria": "1. /protected/profile 접근 시 px-4 패딩 적용된 프로필 페이지 표시\n2. ProfileForm 기존 기능 정상 동작\n3. LogoutButton이 페이지 하단에 표시\n4. 하단 내비게이션 바와 겹치지 않음 (pb-20 확인)",
+      "analysisResult": "ROADMAP Task 004 주최자 모바일 UI/UX 완성: 더미 데이터(lib/mock-data.ts) 기반으로 5개 placeholder 페이지를 완성하고 React Hook Form + Zod를 설치한다. 서버 컴포넌트 우선, 인터랙션 필요 시 클라이언트 컴포넌트 분리, emerald-500 색상 팔레트 유지, 한글 주석 필수. userId='user-1' 하드코딩으로 더미 모드 동작. Phase 3에서 실제 인증/DB 연동 예정.",
+      "summary": "프로필 페이지 레이아웃 개선 완료. p-4 패딩, h1 제목, ProfileForm 유지, Separator + LogoutButton 하단 배치. Supabase 데이터 로직 변경 없이 스타일만 모바일 컨테이너 패턴에 맞게 수정.",
+      "completedAt": "2026-05-21T08:45:59.959Z"
     }
   ]
 }
