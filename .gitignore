@@ -43,3 +43,6 @@ next-env.d.ts
 
 # claude code plans (내부 계획 파일)
 .claude/plans/
+
+# playwright mcp 로그/스크린샷
+.playwright-mcp/
