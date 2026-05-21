@@ -1,45 +1,56 @@
-import { AuthButton } from "@/components/auth-button";
-import { ThemeSwitcher } from "@/components/theme-switcher";
+"use client";
+
+import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Suspense } from "react";
+import { CalendarDays, Home, User } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const NAV_ITEMS = [
+  { href: "/protected/events", label: "이벤트", icon: CalendarDays },
+  { href: "/", label: "홈", icon: Home },
+  { href: "/protected/profile", label: "프로필", icon: User },
+];
 
 export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <main className="flex min-h-screen flex-col items-center">
-      <div className="flex w-full flex-1 flex-col items-center gap-20">
-        <nav className="flex h-16 w-full justify-center border-b border-b-foreground/10">
-          <div className="flex w-full max-w-5xl items-center justify-between p-3 px-5 text-sm">
-            <div className="flex items-center gap-5 font-semibold">
-              <Link href="/protected" className="text-base font-bold">
-                모임링크
-              </Link>
-              <Link
-                href="/protected"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                이벤트 관리
-              </Link>
-            </div>
-            <Suspense>
-              <AuthButton />
-            </Suspense>
-          </div>
-        </nav>
-        <div className="flex max-w-5xl flex-1 flex-col gap-20 p-5">
-          {children}
-        </div>
+  const pathname = usePathname();
 
-        <footer className="mx-auto flex w-full items-center justify-center gap-8 border-t py-16 text-center text-xs">
-          <p className="text-muted-foreground">
-            © 2025 모임링크. 소모임 이벤트 관리 서비스.
-          </p>
-          <ThemeSwitcher />
-        </footer>
-      </div>
-    </main>
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      {/* 상단 헤더 */}
+      <header className="sticky top-0 z-10 flex h-14 items-center border-b bg-background px-4">
+        <Link href="/" className="text-lg font-bold">
+          Gather
+        </Link>
+      </header>
+
+      {/* 메인 컨텐츠 */}
+      <main className="flex-1 pb-20">{children}</main>
+
+      {/* 하단 내비게이션 바 (모바일) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-10 flex h-16 items-center justify-around border-t bg-background">
+        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          const isActive = pathname.startsWith(href) && href !== "/";
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                "flex flex-col items-center gap-1 px-4 py-2 text-xs transition-colors",
+                isActive
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <Icon size={22} />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
   );
 }
