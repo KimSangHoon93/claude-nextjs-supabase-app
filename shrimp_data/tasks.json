@@ -1,103 +1,105 @@
 {
   "tasks": [
     {
-      "id": "bac8874c-3a1d-4c10-b1a8-daf1d34323da",
-      "name": "Task 002: 미들웨어 공개 경로 확장 및 라우트 골격 생성",
-      "description": "비로그인 참여자가 /e/[share_token] 경로에 접근할 수 있도록 lib/supabase/proxy.ts의 updateSession() 리다이렉트 조건에 /e/ 경로를 예외 처리하고, 이벤트 도메인에 필요한 9개 라우트의 빈 껍데기 page.tsx 파일을 생성한다. Phase 2 UI 구현의 라우트 구조 기반을 확정하는 단계.",
-      "status": "pending",
+      "id": "7f95742b-086e-42f2-bbf9-3590da782282",
+      "name": "Task 001 완료: 관리자 로그인 페이지 생성 및 미들웨어 공개 경로 추가",
+      "description": "PRD 기준 13번째 누락 페이지인 app/admin/login/page.tsx를 빈 껍데기로 생성하고, 미인증 사용자가 관리자 로그인 페이지에 접근할 수 있도록 lib/supabase/proxy.ts 미들웨어에 /admin/login 공개 경로 예외를 추가합니다.",
+      "notes": "admin/layout.tsx의 role 체크 로직은 Phase 3 Task 008에서 추가 예정. 현재는 빈 껍데기만 생성.",
+      "status": "completed",
       "dependencies": [],
-      "createdAt": "2026-05-19T04:42:34.520Z",
-      "updatedAt": "2026-05-19T04:42:34.520Z",
+      "createdAt": "2026-05-21T07:36:57.280Z",
+      "updatedAt": "2026-05-21T07:42:37.785Z",
       "relatedFiles": [
         {
           "path": "lib/supabase/proxy.ts",
           "type": "TO_MODIFY",
-          "description": "updateSession() 화이트리스트에 /e/ 경로 추가",
+          "description": "updateSession() 미들웨어 - /admin/login 공개 경로 예외 추가",
           "lineStart": 50,
+          "lineEnd": 62
+        },
+        {
+          "path": "app/admin/login/page.tsx",
+          "type": "CREATE",
+          "description": "관리자 로그인 페이지 빈 껍데기"
+        },
+        {
+          "path": "app/admin/layout.tsx",
+          "type": "REFERENCE",
+          "description": "관리자 레이아웃 현황 참조"
+        }
+      ],
+      "implementationGuide": "1. lib/supabase/proxy.ts 수정: updateSession() 내 조건문에 !request.nextUrl.pathname.startsWith('/admin/login') 조건 추가\n2. app/admin/login/page.tsx 생성: export default function AdminLoginPage() { return <div>관리자 로그인</div> }\n\npseudocode:\n// proxy.ts 수정\nif (\n  pathname !== '/' &&\n  !user &&\n  !pathname.startsWith('/login') &&\n  !pathname.startsWith('/auth') &&\n  !pathname.startsWith('/invite/') &&\n  !pathname.startsWith('/admin/login')  // 추가\n) { redirect to /auth/login }",
+      "verificationCriteria": "1. app/admin/login/page.tsx 파일이 존재하고 유효한 default export를 가짐\n2. lib/supabase/proxy.ts에 /admin/login 예외 조건이 추가됨\n3. npm run lint 통과",
+      "analysisResult": "Gather Phase 1 애플리케이션 골격 구축. 코드베이스 분석 결과, 라우트 골격(Task 001)은 13개 중 12개 완료 상태이며 타입 정의(Task 002)가 미구현. 실질적 잔여 작업: (1) 미들웨어 공개 경로 추가, (2) 프론트엔드 타입 정의 파일 생성, (3) 더미 데이터 유틸리티 생성, (4) admin/login 페이지 껍데기 생성. Phase 2 UI 구현을 위한 타입과 더미 데이터 기반을 마련하는 것이 핵심 목표.",
+      "summary": "app/admin/login/page.tsx 생성 완료(유효한 default export), lib/supabase/proxy.ts에 /admin/login 공개 경로 예외 조건 추가 완료, npm run lint 통과. 검증 기준 전항목 충족.",
+      "completedAt": "2026-05-21T07:42:37.783Z"
+    },
+    {
+      "id": "b08e2999-2f88-405d-a59f-f71cd9026955",
+      "name": "Task 002-A: 프론트엔드 타입 정의 파일 생성 (types/gather.ts)",
+      "description": "Phase 2 UI 구현을 위한 프론트엔드 전용 TypeScript 타입을 정의합니다. DB 스키마(types/database.ts)와 별도로 관리되며, 필드명은 camelCase를 사용합니다. 이벤트, 사용자, 참여자, 관리자 통계, 컴포넌트 Props 타입을 포함합니다.",
+      "notes": "types/database.ts는 Supabase CLI 생성 파일로 직접 수정 금지. gather.ts는 프론트엔드 UI 레이어 전용 타입.",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2026-05-21T07:36:57.280Z",
+      "updatedAt": "2026-05-21T07:42:40.773Z",
+      "relatedFiles": [
+        {
+          "path": "types/gather.ts",
+          "type": "CREATE",
+          "description": "프론트엔드 전용 타입 정의 파일"
+        },
+        {
+          "path": "types/database.ts",
+          "type": "REFERENCE",
+          "description": "Supabase CLI 생성 DB 타입 (참조만, 수정 금지)",
+          "lineStart": 1,
           "lineEnd": 60
         },
         {
-          "path": "app/e/[share_token]/page.tsx",
-          "type": "CREATE",
-          "description": "이벤트 공개 페이지 빈 껍데기"
-        },
-        {
-          "path": "app/e/[share_token]/announcements/page.tsx",
-          "type": "CREATE",
-          "description": "참여자용 공지 목록 빈 껍데기"
-        },
-        {
-          "path": "app/protected/events/new/page.tsx",
-          "type": "CREATE",
-          "description": "이벤트 생성 빈 껍데기"
-        },
-        {
-          "path": "app/protected/events/[id]/page.tsx",
-          "type": "CREATE",
-          "description": "이벤트 관리 상세 빈 껍데기"
-        },
-        {
-          "path": "app/protected/events/[id]/edit/page.tsx",
-          "type": "CREATE",
-          "description": "이벤트 수정 빈 껍데기"
-        },
-        {
-          "path": "app/protected/events/[id]/participants/page.tsx",
-          "type": "CREATE",
-          "description": "참여자 목록 빈 껍데기"
-        },
-        {
-          "path": "app/protected/events/[id]/announcements/page.tsx",
-          "type": "CREATE",
-          "description": "주최자용 공지 목록 빈 껍데기"
-        },
-        {
-          "path": "app/protected/events/[id]/announcements/new/page.tsx",
-          "type": "CREATE",
-          "description": "공지 작성 빈 껍데기"
+          "path": "docs/PRD.md",
+          "type": "REFERENCE",
+          "description": "데이터 모델 섹션 참조 (users, events, event_participants 테이블 스키마)",
+          "lineStart": 350,
+          "lineEnd": 400
         }
       ],
-      "implementationGuide": "1. lib/supabase/proxy.ts 수정:\n   - updateSession()의 리다이렉트 조건에 !request.nextUrl.pathname.startsWith('/e') 추가\n   - 현재 조건: pathname !== '/' && !user && !pathname.startsWith('/login') && !pathname.startsWith('/auth')\n   - 변경 후: 위 조건에 && !pathname.startsWith('/e') 추가\n\n2. 빈 껍데기 페이지 생성 (각 파일은 export default function + 라우트명 표시하는 h1 태그만 포함):\n   - app/e/[share_token]/page.tsx\n   - app/e/[share_token]/announcements/page.tsx\n   - app/protected/events/new/page.tsx\n   - app/protected/events/[id]/page.tsx\n   - app/protected/events/[id]/edit/page.tsx\n   - app/protected/events/[id]/participants/page.tsx\n   - app/protected/events/[id]/announcements/page.tsx\n   - app/protected/events/[id]/announcements/new/page.tsx",
-      "verificationCriteria": "1. 비로그인 상태에서 /e/임의값 접근 시 /auth/login으로 리다이렉트되지 않고 페이지 렌더링\n2. 비로그인 상태에서 /protected/events/new 접근 시 /auth/login 리다이렉트 유지\n3. 9개 라우트 모두 404 없이 접근 가능\n4. TypeScript 타입 오류 없음, npm run build 통과",
-      "analysisResult": "Task 001(인증 및 기본 인프라 구축)은 claude-nextjs-supabase-app 스타터로 완전히 구현된 상태. 8개 인증 라우트, Supabase 클라이언트 3종 분리, Google OAuth + 이메일/비밀번호 인증, shadcn/ui 컴포넌트, next-themes, 프로필 페이지, DB 타입 파일 모두 정상 확인. Phase 1의 다음 단계인 Task 002(미들웨어 공개 경로 확장 및 라우트 골격 생성)와 Task 003(공통 레이아웃 및 네비게이션 골격 구성)이 즉시 진행 가능한 상태."
+      "implementationGuide": "types/gather.ts 생성:\n\n// 열거형 타입\nexport type EventStatus = 'upcoming' | 'ongoing' | 'ended'\nexport type ParticipantRole = 'host' | 'participant'\nexport type UserRole = 'user' | 'admin'\n\n// 엔티티 타입\nexport interface GatherUser { id, email, name, avatarUrl, role: UserRole, createdAt }\nexport interface GatherEvent { id, title, description, location, eventDate, coverImageUrl, inviteCode, status: EventStatus, createdBy, participantCount, createdAt, updatedAt }\nexport interface GatherParticipant { id, eventId, userId, role: ParticipantRole, joinedAt, user?: GatherUser }\n\n// 관리자 통계 타입\nexport interface AdminStats { todayEvents, weekEvents, monthEvents, totalEvents, todayUsers, weekUsers, totalUsers }\n\n// 폼 입력값 타입\nexport interface EventFormValues { title, description, location, eventDate, coverImage?: File }\n\n// 컴포넌트 Props 타입\nexport interface EventCardProps { event: GatherEvent, onClick?: () => void }\nexport interface ParticipantCardProps { participant: GatherParticipant }",
+      "verificationCriteria": "1. types/gather.ts 파일이 존재하고 모든 타입이 export됨\n2. EventStatus, ParticipantRole, UserRole 유니온 타입 정의됨\n3. GatherUser, GatherEvent, GatherParticipant, AdminStats 인터페이스 정의됨\n4. EventFormValues, EventCardProps, ParticipantCardProps Props 타입 정의됨\n5. npm run lint 통과 (TypeScript 오류 없음)",
+      "analysisResult": "Gather Phase 1 애플리케이션 골격 구축. 코드베이스 분석 결과, 라우트 골격(Task 001)은 13개 중 12개 완료 상태이며 타입 정의(Task 002)가 미구현. 실질적 잔여 작업: (1) 미들웨어 공개 경로 추가, (2) 프론트엔드 타입 정의 파일 생성, (3) 더미 데이터 유틸리티 생성, (4) admin/login 페이지 껍데기 생성. Phase 2 UI 구현을 위한 타입과 더미 데이터 기반을 마련하는 것이 핵심 목표.",
+      "summary": "types/gather.ts 생성 완료. EventStatus/ParticipantRole/UserRole 유니온 타입, GatherUser/GatherEvent/GatherParticipant/AdminStats 인터페이스, EventFormValues/EventCardProps/ParticipantCardProps Props 타입 모두 export됨. camelCase 필드명 준수, npm run lint 통과.",
+      "completedAt": "2026-05-21T07:42:40.765Z"
     },
     {
-      "id": "77ba892b-51bf-4317-9f79-130030251405",
-      "name": "Task 003: 공통 레이아웃 및 네비게이션 골격 구성",
-      "description": "주최자용 protected 레이아웃에 이벤트 관리 네비게이션을 추가하고, 참여자용 공개 레이아웃(app/e/[share_token]/layout.tsx)을 신규 생성한다. 랜딩 페이지와 주최자 대시보드도 서비스 콘셉트에 맞는 구조로 교체한다. 모든 화면은 더미 텍스트 사용, 스타터 전용 컴포넌트 제거.",
-      "status": "pending",
+      "id": "2549dc04-65b3-4b59-b678-4ccfa3907842",
+      "name": "Task 002-B: 더미 데이터 유틸리티 생성 (lib/mock-data.ts)",
+      "description": "Phase 2 UI 구현에 필요한 더미 데이터와 조회 헬퍼 함수를 생성합니다. types/gather.ts의 타입을 기반으로 실제처럼 보이는 샘플 데이터를 작성하며, Phase 3 DB 연동 시 제거될 임시 파일입니다.",
+      "notes": "파일 상단에 주석으로 임시 파일임을 명시. Phase 3 Task 007 완료 후 전량 교체 예정.",
+      "status": "completed",
       "dependencies": [
         {
-          "taskId": "bac8874c-3a1d-4c10-b1a8-daf1d34323da"
+          "taskId": "b08e2999-2f88-405d-a59f-f71cd9026955"
         }
       ],
-      "createdAt": "2026-05-19T04:42:34.520Z",
-      "updatedAt": "2026-05-19T04:42:34.520Z",
+      "createdAt": "2026-05-21T07:36:57.280Z",
+      "updatedAt": "2026-05-21T07:43:20.012Z",
       "relatedFiles": [
         {
-          "path": "app/protected/layout.tsx",
-          "type": "TO_MODIFY",
-          "description": "서비스명 및 네비게이션 업데이트, 스타터 컴포넌트 제거"
-        },
-        {
-          "path": "app/e/[share_token]/layout.tsx",
+          "path": "lib/mock-data.ts",
           "type": "CREATE",
-          "description": "참여자용 공개 레이아웃 신규 생성"
+          "description": "Phase 2 UI용 더미 데이터 및 조회 헬퍼"
         },
         {
-          "path": "app/page.tsx",
-          "type": "TO_MODIFY",
-          "description": "서비스 랜딩 페이지로 교체"
-        },
-        {
-          "path": "app/protected/page.tsx",
-          "type": "TO_MODIFY",
-          "description": "주최자 대시보드 placeholder로 교체"
+          "path": "types/gather.ts",
+          "type": "DEPENDENCY",
+          "description": "더미 데이터 타입 참조"
         }
       ],
-      "implementationGuide": "1. app/protected/layout.tsx 수정:\n   - 서비스명을 '소모임 이벤트 관리'로 변경\n   - DeployButton, EnvVarWarning 등 스타터 전용 컴포넌트 제거\n   - 상단 nav에 '내 이벤트' 링크(/protected) 추가\n\n2. app/e/[share_token]/layout.tsx 신규 생성:\n   - 심플 헤더(서비스명 + 이벤트명 자리 placeholder)\n   - '참여 신청' 탭(/e/[share_token])과 '공지' 탭(/e/[share_token]/announcements) 링크\n   - children 렌더링 영역\n\n3. app/page.tsx 수정:\n   - 히어로 섹션: 서비스명, 슬로건('카카오톡 공지, 이제 따로 관리하세요'), CTA 버튼(→ /auth/login)\n   - 핵심 가치 3가지 섹션(더미 카드)\n   - ConnectSupabaseSteps, SignUpUserSteps, DeployButton 등 스타터 컴포넌트 제거\n\n4. app/protected/page.tsx 수정:\n   - '내 이벤트' 헤딩 + '이벤트 만들기' 버튼(→ /protected/events/new)\n   - 빈 상태 placeholder(아직 이벤트가 없습니다 메시지)\n   - 기존 스타터 tutorial 컴포넌트 제거",
-      "verificationCriteria": "1. 랜딩 페이지에 히어로 섹션, 핵심 가치 3가지, CTA 버튼 표시\n2. /protected 대시보드에 이벤트 목록 placeholder와 '이벤트 만들기' 버튼 표시\n3. /protected/* 경로에서 DeployButton 등 스타터 전용 컴포넌트 미노출\n4. /e/[share_token]에서 탭 네비게이션 포함 참여자용 레이아웃 적용\n5. 라이트/다크 테마 모두 레이아웃 깨짐 없음\n6. npm run build 통과",
-      "analysisResult": "Task 001(인증 및 기본 인프라 구축)은 claude-nextjs-supabase-app 스타터로 완전히 구현된 상태. 8개 인증 라우트, Supabase 클라이언트 3종 분리, Google OAuth + 이메일/비밀번호 인증, shadcn/ui 컴포넌트, next-themes, 프로필 페이지, DB 타입 파일 모두 정상 확인. Phase 1의 다음 단계인 Task 002(미들웨어 공개 경로 확장 및 라우트 골격 생성)와 Task 003(공통 레이아웃 및 네비게이션 골격 구성)이 즉시 진행 가능한 상태."
+      "implementationGuide": "lib/mock-data.ts 생성:\n\nimport { GatherUser, GatherEvent, GatherParticipant, AdminStats } from '@/types/gather'\n\n// 더미 사용자 (3명: 주최자 1명, 참여자 2명)\nexport const MOCK_USERS: GatherUser[] = [...]\n\n// 더미 이벤트 (4개: upcoming 2개, ongoing 1개, ended 1개)\nexport const MOCK_EVENTS: GatherEvent[] = [\n  { id: 'evt-1', title: '팀 점심 모임', status: 'upcoming', eventDate: '2025-06-15T12:00:00', location: '강남구 선릉역 근처', inviteCode: 'abc123', participantCount: 3, ... },\n  ...\n]\n\n// 더미 참여자\nexport const MOCK_PARTICIPANTS: GatherParticipant[] = [...]\n\n// 더미 관리자 통계\nexport const MOCK_ADMIN_STATS: AdminStats = { todayEvents: 2, weekEvents: 8, monthEvents: 25, totalEvents: 120, todayUsers: 5, weekUsers: 32, totalUsers: 450 }\n\n// 조회 헬퍼 함수\nexport function getMockEventById(id: string): GatherEvent | undefined\nexport function getMockEventByInviteCode(code: string): GatherEvent | undefined\nexport function getMockParticipantsByEventId(eventId: string): GatherParticipant[]",
+      "verificationCriteria": "1. lib/mock-data.ts 파일이 존재함\n2. MOCK_USERS, MOCK_EVENTS, MOCK_PARTICIPANTS, MOCK_ADMIN_STATS가 export됨\n3. MOCK_EVENTS에 upcoming/ongoing/ended 상태가 모두 포함됨\n4. getMockEventById, getMockEventByInviteCode, getMockParticipantsByEventId 함수가 export됨\n5. npm run lint 통과",
+      "analysisResult": "Gather Phase 1 애플리케이션 골격 구축. 코드베이스 분석 결과, 라우트 골격(Task 001)은 13개 중 12개 완료 상태이며 타입 정의(Task 002)가 미구현. 실질적 잔여 작업: (1) 미들웨어 공개 경로 추가, (2) 프론트엔드 타입 정의 파일 생성, (3) 더미 데이터 유틸리티 생성, (4) admin/login 페이지 껍데기 생성. Phase 2 UI 구현을 위한 타입과 더미 데이터 기반을 마련하는 것이 핵심 목표.",
+      "summary": "lib/mock-data.ts 생성 완료. MOCK_USERS(3명), MOCK_EVENTS(4개: upcoming 2/ongoing 1/ended 1), MOCK_PARTICIPANTS(5개), MOCK_ADMIN_STATS export됨. getMockEventById, getMockEventByInviteCode, getMockParticipantsByEventId 헬퍼 함수 구현. 임시 파일 주석 명시. npm run lint 통과.",
+      "completedAt": "2026-05-21T07:43:20.010Z"
     }
   ]
 }
