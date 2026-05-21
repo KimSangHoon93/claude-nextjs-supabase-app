@@ -1,7 +1,7 @@
 ---
 task: "003"
 title: 공통 레이아웃 및 네비게이션 골격 구성
-status: pending
+status: done
 ---
 
 ## 개요
@@ -19,10 +19,10 @@ status: pending
 
 ## 구현 단계
 
-- [ ] 1단계: `app/protected/layout.tsx` 수정 — 상단 네비게이션에 "이벤트 관리" 링크 및 서비스명 변경, 스타터 전용 컴포넌트(`DeployButton`, 튜토리얼 링크 등) 제거
-- [ ] 2단계: `app/e/[share_token]/layout.tsx` 생성 — 이벤트 공개 영역을 위한 심플 레이아웃 (헤더에 서비스명, 이벤트명 자리, 공지 탭 링크 포함)
-- [ ] 3단계: `app/page.tsx` 수정 — 히어로 섹션(서비스명/슬로건/CTA 버튼), 핵심 가치 3가지 섹션 구조로 교체 (더미 텍스트 사용, 스타터 전용 컴포넌트 제거)
-- [ ] 4단계: `app/protected/page.tsx` 수정 — "내 이벤트" 영역 placeholder(빈 상태 메시지 + "이벤트 만들기" 버튼)로 교체
+- [x] 1단계: `app/protected/layout.tsx` 수정 — 상단 네비게이션에 "이벤트 관리" 링크 및 서비스명 변경, 스타터 전용 컴포넌트(`DeployButton`, 튜토리얼 링크 등) 제거
+- [x] 2단계: `app/e/[share_token]/layout.tsx` 생성 — 이벤트 공개 영역을 위한 심플 레이아웃 (헤더에 서비스명, 이벤트명 자리, 공지 탭 링크 포함)
+- [x] 3단계: `app/page.tsx` 수정 — 히어로 섹션(서비스명/슬로건/CTA 버튼), 핵심 가치 3가지 섹션 구조로 교체 (더미 텍스트 사용, 스타터 전용 컴포넌트 제거)
+- [x] 4단계: `app/protected/page.tsx` 수정 — "내 이벤트" 영역 placeholder(빈 상태 메시지 + "이벤트 만들기" 버튼)로 교체
 
 ## 수락 기준
 

@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getProfile } from "@/lib/supabase/profile";
 import { Button } from "@/components/ui/button";
-import { UserIcon } from "lucide-react";
+import { CalendarPlus } from "lucide-react";
 
 export default async function ProtectedPage() {
   const supabase = await createClient();
@@ -15,43 +14,29 @@ export default async function ProtectedPage() {
     redirect("/auth/login");
   }
 
-  const { data: profile } = await getProfile(supabase, user.id);
-
   return (
-    <div className="flex w-full max-w-2xl flex-1 flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-bold">대시보드</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          로그인된 사용자만 이 페이지를 볼 수 있습니다.
-        </p>
+    <div className="flex w-full max-w-5xl flex-1 flex-col gap-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">내 이벤트</h1>
+        <Button asChild>
+          <Link href="/protected/events/new">
+            <CalendarPlus size={16} />
+            이벤트 만들기
+          </Link>
+        </Button>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-lg border p-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-            <UserIcon size={24} className="text-muted-foreground" />
-          </div>
-          <div>
-            <p className="font-semibold">
-              {profile?.full_name ?? "이름 미설정"}
-            </p>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
-          </div>
-        </div>
-
-        {profile?.bio && (
-          <p className="text-sm text-muted-foreground">{profile.bio}</p>
-        )}
-
-        {profile?.username && (
-          <p className="text-sm">
-            <span className="text-muted-foreground">사용자명: </span>
-            <span className="font-mono">@{profile.username}</span>
+      {/* 이벤트 목록 placeholder */}
+      <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed py-20 text-center">
+        <CalendarPlus size={40} className="text-muted-foreground" />
+        <div>
+          <p className="font-medium">아직 만든 이벤트가 없어요</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            첫 번째 이벤트를 만들고 참여자를 모아보세요
           </p>
-        )}
-
-        <Button asChild variant="outline" className="w-fit">
-          <Link href="/protected/profile">프로필 편집</Link>
+        </div>
+        <Button asChild variant="outline">
+          <Link href="/protected/events/new">이벤트 만들기</Link>
         </Button>
       </div>
     </div>
