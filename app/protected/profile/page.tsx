@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getProfile } from "@/lib/supabase/profile";
 import { ProfileForm } from "@/components/profile-form";
+import { LogoutButton } from "@/components/logout-button";
+import { Separator } from "@/components/ui/separator";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -20,15 +22,17 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="flex w-full max-w-2xl flex-1 flex-col gap-8">
+    <div className="space-y-6 p-4">
+      <h1 className="text-xl font-bold">프로필</h1>
+
+      {/* 프로필 폼 (Supabase 연동 유지) */}
+      <ProfileForm profile={profile} />
+
+      <Separator />
+
+      {/* 로그아웃 */}
       <div>
-        <h1 className="text-2xl font-bold">프로필 편집</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          프로필 정보를 수정하고 저장하세요.
-        </p>
-      </div>
-      <div className="rounded-lg border p-6">
-        <ProfileForm profile={profile} />
+        <LogoutButton />
       </div>
     </div>
   );
