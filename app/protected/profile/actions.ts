@@ -17,10 +17,8 @@ export async function updateProfileAction(
     return { error: "인증이 필요합니다." };
   }
 
-  const username = formData.get("username") as string;
   const data = {
     full_name: (formData.get("full_name") as string) || null,
-    username: username || null,
     website: (formData.get("website") as string) || null,
     bio: (formData.get("bio") as string) || null,
   };

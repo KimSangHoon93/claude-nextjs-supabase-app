@@ -54,16 +54,6 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="username">사용자명</Label>
-        <Input
-          id="username"
-          name="username"
-          defaultValue={profile.username ?? ""}
-          placeholder="honggildong"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
         <Label htmlFor="website">웹사이트</Label>
         <Input
           id="website"
