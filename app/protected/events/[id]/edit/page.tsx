@@ -23,7 +23,11 @@ export default async function EventEditPage({ params }: EventEditPageProps) {
   return (
     <div className="space-y-6 p-4">
       <h1 className="text-xl font-bold">이벤트 수정</h1>
-      <EventForm mode="edit" defaultValues={defaultValues} />
+      <EventForm
+        mode="edit"
+        defaultValues={defaultValues}
+        defaultImageUrl={event.coverImageUrl}
+      />
     </div>
   );
 }
