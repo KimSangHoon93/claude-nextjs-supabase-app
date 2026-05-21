@@ -1,6 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { CalendarDays, MapPin, Users, Pencil, Trash2 } from "lucide-react";
+import {
+  CalendarDays,
+  MapPin,
+  Users,
+  Pencil,
+  Trash2,
+  CheckCircle2,
+  LogOut,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -103,6 +111,11 @@ export default async function EventDetailPage({
     (p) => p.userId === MOCK_USER_ID && p.role === "host",
   );
 
+  // 현재 사용자가 일반 참여자인지 여부 확인
+  const isParticipant = participants.some(
+    (p) => p.userId === MOCK_USER_ID && p.role === "participant",
+  );
+
   const gradient = pickGradient(event.id);
 
   return (
@@ -163,9 +176,10 @@ export default async function EventDetailPage({
           ))}
         </section>
 
-        {/* 섹션3: 주최자 전용 액션 */}
-        {isHost && (
+        {/* 섹션3: 역할별 액션 */}
+        {isHost ? (
           <>
+            {/* 주최자 전용 액션 */}
             <Separator />
             <section className="space-y-2">
               <InviteCopyButton inviteCode={event.inviteCode} />
@@ -184,7 +198,28 @@ export default async function EventDetailPage({
               </Button>
             </section>
           </>
-        )}
+        ) : isParticipant ? (
+          <>
+            {/* 일반 참여자 뷰 */}
+            <Separator />
+            <section className="space-y-2">
+              {/* 참여 상태 표시 */}
+              <div className="flex items-center gap-2 text-sm text-emerald-600">
+                <CheckCircle2 size={16} />
+                <span>참여 중인 이벤트입니다</span>
+              </div>
+              {/* 참여 취소 버튼 — Phase 3에서 실제 로직으로 교체 예정 */}
+              <Button
+                variant="ghost"
+                disabled
+                className="w-full text-muted-foreground"
+              >
+                <LogOut size={16} className="mr-2" />
+                참여 취소
+              </Button>
+            </section>
+          </>
+        ) : null}
       </div>
     </div>
   );
