@@ -163,3 +163,27 @@ export function getMockParticipantsByEventId(
 ): GatherParticipant[] {
   return MOCK_PARTICIPANTS.filter((p) => p.eventId === eventId);
 }
+
+// 사용자가 참여한 모든 이벤트 반환 (주최자 + 참여자 포함)
+export function getMockEventsByUserId(userId: string): GatherEvent[] {
+  const eventIds = MOCK_PARTICIPANTS.filter((p) => p.userId === userId).map(
+    (p) => p.eventId,
+  );
+  return MOCK_EVENTS.filter((e) => eventIds.includes(e.id));
+}
+
+// 사용자가 주최한 이벤트만 반환
+export function getMockHostedEventsByUserId(userId: string): GatherEvent[] {
+  const eventIds = MOCK_PARTICIPANTS.filter(
+    (p) => p.userId === userId && p.role === "host",
+  ).map((p) => p.eventId);
+  return MOCK_EVENTS.filter((e) => eventIds.includes(e.id));
+}
+
+// 사용자가 참여자로 참가한 이벤트만 반환
+export function getMockJoinedEventsByUserId(userId: string): GatherEvent[] {
+  const eventIds = MOCK_PARTICIPANTS.filter(
+    (p) => p.userId === userId && p.role === "participant",
+  ).map((p) => p.eventId);
+  return MOCK_EVENTS.filter((e) => eventIds.includes(e.id));
+}
