@@ -1,7 +1,7 @@
 ---
 task: "002"
 title: 미들웨어 공개 경로 확장 및 라우트 골격 생성
-status: pending
+status: done
 ---
 
 ## 개요
@@ -24,15 +24,15 @@ status: pending
 
 ## 구현 단계
 
-- [ ] 1단계: `lib/supabase/proxy.ts`의 `updateSession()` 리다이렉트 조건에 `/e/` 경로 예외 추가
-- [ ] 2단계: `app/e/[share_token]/page.tsx` 빈 껍데기 생성
-- [ ] 3단계: `app/e/[share_token]/announcements/page.tsx` 빈 껍데기 생성
-- [ ] 4단계: `app/protected/events/new/page.tsx` 빈 껍데기 생성
-- [ ] 5단계: `app/protected/events/[id]/page.tsx` 빈 껍데기 생성
-- [ ] 6단계: `app/protected/events/[id]/edit/page.tsx` 빈 껍데기 생성
-- [ ] 7단계: `app/protected/events/[id]/participants/page.tsx` 빈 껍데기 생성
-- [ ] 8단계: `app/protected/events/[id]/announcements/page.tsx` 빈 껍데기 생성
-- [ ] 9단계: `app/protected/events/[id]/announcements/new/page.tsx` 빈 껍데기 생성
+- [x] 1단계: `lib/supabase/proxy.ts`의 `updateSession()` 리다이렉트 조건에 `/e/` 경로 예외 추가
+- [x] 2단계: `app/e/[share_token]/page.tsx` 빈 껍데기 생성
+- [x] 3단계: `app/e/[share_token]/announcements/page.tsx` 빈 껍데기 생성
+- [x] 4단계: `app/protected/events/new/page.tsx` 빈 껍데기 생성
+- [x] 5단계: `app/protected/events/[id]/page.tsx` 빈 껍데기 생성
+- [x] 6단계: `app/protected/events/[id]/edit/page.tsx` 빈 껍데기 생성
+- [x] 7단계: `app/protected/events/[id]/participants/page.tsx` 빈 껍데기 생성
+- [x] 8단계: `app/protected/events/[id]/announcements/page.tsx` 빈 껍데기 생성
+- [x] 9단계: `app/protected/events/[id]/announcements/new/page.tsx` 빈 껍데기 생성
 
 ## 수락 기준
 
