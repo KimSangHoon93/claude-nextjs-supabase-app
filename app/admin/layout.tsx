@@ -19,6 +19,11 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
 
+  // 로그인 페이지는 사이드바/헤더 없이 full-screen으로 렌더링
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       {/* 사이드바 */}
