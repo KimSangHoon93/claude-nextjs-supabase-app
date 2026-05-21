@@ -46,3 +46,6 @@ next-env.d.ts
 
 # playwright mcp 로그/스크린샷
 .playwright-mcp/
+
+# 테스트용 스크린샷
+*.png
