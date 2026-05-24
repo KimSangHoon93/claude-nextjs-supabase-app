@@ -14,14 +14,16 @@ export default function Page() {
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl">
-                Thank you for signing up!
+                회원가입을 완료했습니다!
               </CardTitle>
-              <CardDescription>Check your email to confirm</CardDescription>
+              <CardDescription>
+                이메일을 확인하여 가입을 완료해 주세요
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                You&apos;ve successfully signed up. Please check your email to
-                confirm your account before signing in.
+                회원가입이 완료되었습니다. 이메일을 확인하여 계정을 인증한 후
+                로그인해 주세요.
               </p>
             </CardContent>
           </Card>
