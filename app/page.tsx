@@ -1,10 +1,16 @@
+import { createClient } from "@/lib/supabase/server";
 import MobileShell from "@/components/mobile-shell";
-import EventsContent from "@/components/gather/events-content";
+import HomeLanding from "@/components/gather/home-landing";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <MobileShell>
-      <EventsContent />
+      <HomeLanding isLoggedIn={!!user} />
     </MobileShell>
   );
 }
