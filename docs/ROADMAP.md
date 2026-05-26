@@ -105,14 +105,15 @@ Gather는 5-30명 규모의 소규모 이벤트 주최자와 참여자를 위한
 
 ### Phase 3: 데이터베이스 설정 및 핵심 기능 구현
 
-- **Task 007: 데이터베이스 스키마 및 Supabase 초기 설정**
-  - UI 검토 후 최종 확정된 요구사항을 반영한 스키마 설계
-  - Supabase 데이터베이스 테이블 생성 (users, events, event_participants)
-  - Row Level Security (RLS) 정책 설정
-  - 인덱스 생성 (invite_code, created_by, event_id, user_id)
-  - Supabase Storage 버킷 생성 (event-covers)
-  - Realtime 구독 설정 준비
-  - UI에서 사용 중인 임시 타입을 실제 DB 스키마 타입으로 교체
+- ✅ **Task 007: 데이터베이스 스키마 및 Supabase 초기 설정** - 완료
+  - ✅ UI 검토 후 최종 확정된 요구사항을 반영한 스키마 설계
+  - ✅ Supabase 데이터베이스 테이블 생성 (profiles.role 추가, events, event_participants)
+  - ✅ Row Level Security (RLS) 정책 설정 (profiles/events/event_participants)
+  - ✅ 인덱스 생성 (invite_code, created_by, event_id, user_id)
+  - ✅ Supabase Storage 버킷 생성 (event-covers) 및 정책 설정
+  - ✅ Realtime 구독 설정 (event_participants 테이블)
+  - ✅ UI에서 사용 중인 임시 타입을 실제 DB 스키마 타입으로 교체
+  - ✅ Admin Route Group 접근 제어 강화 (is_admin_user SECURITY DEFINER 함수)
 
 - **Task 008: 인증 시스템 및 권한 관리**
   - Google OAuth 로그인 플로우 완성 (F010)
@@ -302,15 +303,15 @@ Gather는 5-30명 규모의 소규모 이벤트 주최자와 참여자를 위한
 
 ---
 
-**📅 최종 업데이트**: 2026-05-21
-**📊 진행 상황**: Phase 2 완료 (6/15 Tasks 완료 · 40%)
+**📅 최종 업데이트**: 2026-05-26
+**📊 진행 상황**: Phase 3 진행 중 (7/15 Tasks 완료 · 47%)
 
-| Phase                    | 상태    | 완료 Task                    |
-| ------------------------ | ------- | ---------------------------- |
-| Phase 1: 골격 구축       | ✅ 완료 | Task 001, 002                |
-| Phase 2: UI/UX 완성      | ✅ 완료 | Task 003, 004, 005, 006 완료 |
-| Phase 3: DB 및 핵심 기능 | ⏳ 대기 | -                            |
-| Phase 4: 최적화          | ⏳ 대기 | -                            |
+| Phase                    | 상태       | 완료 Task                         |
+| ------------------------ | ---------- | --------------------------------- |
+| Phase 1: 골격 구축       | ✅ 완료    | Task 001, 002                     |
+| Phase 2: UI/UX 완성      | ✅ 완료    | Task 003, 004, 005, 006           |
+| Phase 3: DB 및 핵심 기능 | 🔄 진행 중 | Task 007 완료 · Task 008~012 대기 |
+| Phase 4: 최적화          | ⏳ 대기    | -                                 |
 
 **📌 이 로드맵은 6주 내 MVP 완성을 목표로 하며, 각 Task는 1-2일 내 완료 가능한 단위로 구성되었습니다.**
 **구조 우선 접근법을 엄격히 준수하여 중복 작업을 최소화하고 팀 협업 효율을 극대화합니다.**

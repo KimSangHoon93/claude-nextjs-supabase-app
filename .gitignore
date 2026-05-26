@@ -44,6 +44,9 @@ next-env.d.ts
 # claude code plans (내부 계획 파일)
 .claude/plans/
 
+# shrimp task manager (런타임 상태 데이터)
+shrimp_data/
+
 # playwright mcp 로그/스크린샷
 .playwright-mcp/
 
