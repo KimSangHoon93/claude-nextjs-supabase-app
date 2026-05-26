@@ -1,21 +1,18 @@
-"use client";
-
 import { CalendarDays, Users } from "lucide-react";
 import EventCard from "@/components/gather/event-card";
 import EmptyState from "@/components/gather/empty-state";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  getMockHostedEventsByUserId,
-  getMockJoinedEventsByUserId,
-} from "@/lib/mock-data";
+import type { GatherEvent } from "@/types/gather";
 
-// Phase 3에서 실제 인증으로 교체 예정
-const MOCK_USER_ID = "user-1";
+interface EventsContentProps {
+  hostedEvents: GatherEvent[];
+  joinedEvents: GatherEvent[];
+}
 
-export default function EventsContent() {
-  const hostedEvents = getMockHostedEventsByUserId(MOCK_USER_ID);
-  const joinedEvents = getMockJoinedEventsByUserId(MOCK_USER_ID);
-
+export default function EventsContent({
+  hostedEvents,
+  joinedEvents,
+}: EventsContentProps) {
   return (
     <div className="p-4">
       <Tabs defaultValue="hosted">

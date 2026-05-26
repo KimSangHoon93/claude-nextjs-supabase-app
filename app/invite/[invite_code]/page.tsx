@@ -1,20 +1,20 @@
 import { notFound } from "next/navigation";
-import { CalendarDays, MapPin, Users } from "lucide-react";
+import { CalendarDays, MapPin, Users, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import {
-  getMockEventByInviteCode,
-  getMockParticipantsByEventId,
-} from "@/lib/mock-data";
 import { createClient } from "@/lib/supabase/server";
+import { getEventByInviteCode } from "@/lib/supabase/events";
+import {
+  getParticipantsByEventId,
+  isParticipant,
+} from "@/lib/supabase/participants";
+import { joinEventAction } from "./actions";
 import type { EventStatus } from "@/types/gather";
 
-// 더미 데이터 사용 중 — Phase 3에서 DB 연동으로 교체 예정
 export const dynamic = "force-dynamic";
 
-// 그라데이션 플레이스홀더 배열 — 커버 이미지 없을 때 사용
 const PLACEHOLDER_GRADIENTS = [
   "from-emerald-400 to-teal-500",
   "from-violet-400 to-purple-500",
@@ -25,13 +25,11 @@ const PLACEHOLDER_GRADIENTS = [
   "from-cyan-400 to-emerald-500",
 ];
 
-// 이벤트 ID 기반으로 그라데이션을 일관되게 선택
 function pickGradient(id: string) {
   const sum = id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
   return PLACEHOLDER_GRADIENTS[sum % PLACEHOLDER_GRADIENTS.length];
 }
 
-// 이벤트 상태 뱃지 컴포넌트
 function StatusBadge({ status }: { status: EventStatus }) {
   if (status === "upcoming") return <Badge variant="secondary">예정</Badge>;
   if (status === "ongoing")
@@ -43,7 +41,6 @@ function StatusBadge({ status }: { status: EventStatus }) {
   );
 }
 
-// 날짜 포매터 — 한국어 시간대 기준
 const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
   month: "long",
@@ -60,22 +57,23 @@ interface InvitePageProps {
 }
 
 export default async function InvitePage({ params }: InvitePageProps) {
-  // Next.js 15: params는 반드시 await 해야 함
   const { invite_code } = await params;
 
-  // 초대 코드로 이벤트 조회 — 없으면 404
-  const event = getMockEventByInviteCode(invite_code);
-  if (!event) notFound();
-
-  // 로그인 여부 확인 (로그인 복귀 플로우용)
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 참여자 목록 조회
-  const participants = getMockParticipantsByEventId(event.id);
+  const event = await getEventByInviteCode(supabase, invite_code);
+  if (!event) notFound();
+
+  const [participants, alreadyJoined] = await Promise.all([
+    getParticipantsByEventId(supabase, event.id),
+    user ? isParticipant(supabase, event.id, user.id) : Promise.resolve(false),
+  ]);
+
   const gradient = pickGradient(event.id);
+  const boundJoinAction = joinEventAction.bind(null, invite_code);
 
   return (
     <div>
@@ -103,7 +101,6 @@ export default async function InvitePage({ params }: InvitePageProps) {
             <StatusBadge status={event.status} />
           </div>
 
-          {/* 날짜, 장소, 설명 */}
           <div className="space-y-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <CalendarDays size={16} />
@@ -132,16 +129,34 @@ export default async function InvitePage({ params }: InvitePageProps) {
         </section>
       </div>
 
-      {/* 하단 CTA 영역 — 참여 버튼 */}
+      {/* 하단 CTA 영역 */}
       <div className="border-t px-4 py-4">
         {user ? (
-          // 로그인 사용자 — Task 010에서 실제 참여 로직 연결
-          <Button
-            size="lg"
-            className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
-          >
-            참여하기
-          </Button>
+          alreadyJoined ? (
+            // 이미 참여 중인 경우
+            <div className="space-y-2">
+              <div className="flex items-center justify-center gap-2 text-sm text-emerald-600">
+                <CheckCircle2 size={16} />
+                <span>이미 참여 중인 이벤트예요</span>
+              </div>
+              <Link href={`/protected/events/${event.id}`} className="block">
+                <Button size="lg" variant="outline" className="w-full">
+                  이벤트 보기
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            // 로그인 사용자 — 참여하기
+            <form action={boundJoinAction}>
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
+              >
+                참여하기
+              </Button>
+            </form>
+          )
         ) : (
           // 비로그인 사용자 — 로그인 후 이 페이지로 복귀
           <>

@@ -5,7 +5,6 @@ import {
   MapPin,
   Users,
   Pencil,
-  Trash2,
   CheckCircle2,
   LogOut,
 } from "lucide-react";
@@ -14,17 +13,14 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import ParticipantCard from "@/components/gather/participant-card";
 import InviteCopyButton from "@/components/gather/invite-copy-button";
+import DeleteEventButton from "@/components/gather/delete-event-button";
 import { createClient } from "@/lib/supabase/server";
-import { getProfile } from "@/lib/supabase/profile";
-import {
-  getMockEventById,
-  getMockParticipantsByEventId,
-} from "@/lib/mock-data";
-import type { EventStatus, GatherUser } from "@/types/gather";
+import { getEventById } from "@/lib/supabase/events";
+import { getParticipantsByEventId } from "@/lib/supabase/participants";
+import { deleteEventAction } from "./actions";
+import type { EventStatus } from "@/types/gather";
 
 export const dynamic = "force-dynamic";
-
-const MOCK_USER_ID = "user-1";
 
 const PLACEHOLDER_GRADIENTS = [
   "from-emerald-400 to-teal-500",
@@ -71,56 +67,33 @@ export default async function EventDetailPage({
   params,
 }: EventDetailPageProps) {
   const { id } = await params;
-  const event = getMockEventById(id);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [event, participants] = await Promise.all([
+    getEventById(supabase, id),
+    getParticipantsByEventId(supabase, id),
+  ]);
 
   if (!event) notFound();
 
-  // 실제 로그인 사용자 프로필 조회
-  const supabase = await createClient();
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
-
-  let realUser: GatherUser | null = null;
-  if (authUser) {
-    const { data: profile } = await getProfile(supabase, authUser.id);
-    if (profile) {
-      const seed = profile.username ?? profile.email ?? authUser.id;
-      realUser = {
-        id: MOCK_USER_ID,
-        email: profile.email ?? "",
-        name: profile.full_name ?? profile.username ?? "사용자",
-        avatarUrl:
-          profile.avatar_url ??
-          `https://api.dicebear.com/9.x/avataaars/png?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4`,
-        role: "user",
-        createdAt: profile.created_at ?? "",
-      };
-    }
-  }
-
-  const rawParticipants = getMockParticipantsByEventId(id);
-  // 현재 사용자(user-1)의 user 데이터를 실제 프로필로 교체
-  const participants = realUser
-    ? rawParticipants.map((p) =>
-        p.userId === MOCK_USER_ID ? { ...p, user: realUser } : p,
-      )
-    : rawParticipants;
-
+  const currentUserId = user?.id ?? "";
   const isHost = participants.some(
-    (p) => p.userId === MOCK_USER_ID && p.role === "host",
+    (p) => p.userId === currentUserId && p.role === "host",
   );
-
-  // 현재 사용자가 일반 참여자인지 여부 확인
   const isParticipant = participants.some(
-    (p) => p.userId === MOCK_USER_ID && p.role === "participant",
+    (p) => p.userId === currentUserId && p.role === "participant",
   );
 
   const gradient = pickGradient(event.id);
+  const boundDeleteAction = deleteEventAction.bind(null, event.id);
 
   return (
     <div>
-      {/* 커버 이미지 (full-bleed) */}
+      {/* 커버 이미지 */}
       {event.coverImageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -140,7 +113,7 @@ export default async function EventDetailPage({
         {/* 섹션1: 이벤트 정보 */}
         <section className="space-y-3">
           <div className="flex items-start justify-between gap-2">
-            <h1 className="text-xl font-bold leading-tight">{event.title}</h1>
+            <h1 className="text-xl leading-tight font-bold">{event.title}</h1>
             <StatusBadge status={event.status} />
           </div>
 
@@ -179,7 +152,6 @@ export default async function EventDetailPage({
         {/* 섹션3: 역할별 액션 */}
         {isHost ? (
           <>
-            {/* 주최자 전용 액션 */}
             <Separator />
             <section className="space-y-2">
               <InviteCopyButton inviteCode={event.inviteCode} />
@@ -189,26 +161,17 @@ export default async function EventDetailPage({
                   이벤트 수정
                 </Link>
               </Button>
-              <Button
-                variant="ghost"
-                className="w-full text-destructive hover:text-destructive"
-              >
-                <Trash2 size={16} className="mr-2" />
-                이벤트 삭제
-              </Button>
+              <DeleteEventButton deleteAction={boundDeleteAction} />
             </section>
           </>
         ) : isParticipant ? (
           <>
-            {/* 일반 참여자 뷰 */}
             <Separator />
             <section className="space-y-2">
-              {/* 참여 상태 표시 */}
               <div className="flex items-center gap-2 text-sm text-emerald-600">
                 <CheckCircle2 size={16} />
                 <span>참여 중인 이벤트입니다</span>
               </div>
-              {/* 참여 취소 버튼 — Phase 3에서 실제 로직으로 교체 예정 */}
               <Button
                 variant="ghost"
                 disabled

@@ -1,38 +1,46 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState, useRef, useState, startTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { eventSchema, type EventFormValues } from "@/lib/validations/event";
+import type { ActionResult } from "@/app/protected/events/new/actions";
 
 interface EventFormProps {
   mode: "create" | "edit";
+  action: (
+    prevState: ActionResult,
+    formData: FormData,
+  ) => Promise<ActionResult>;
   defaultValues?: EventFormValues;
   defaultImageUrl?: string | null;
 }
 
+const initialState: ActionResult = { success: false, message: "" };
+
 export default function EventForm({
   mode,
+  action,
   defaultValues,
   defaultImageUrl,
 }: EventFormProps) {
-  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     defaultImageUrl ?? null,
   );
+  const [removeImage, setRemoveImage] = useState(false);
+
+  const [state, formAction, isPending] = useActionState(action, initialState);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
     defaultValues: defaultValues ?? {
@@ -46,23 +54,34 @@ export default function EventForm({
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
+    setRemoveImage(false);
+    setPreviewUrl(URL.createObjectURL(file));
   }
 
   function handleRemoveImage() {
     setPreviewUrl(null);
+    setRemoveImage(true);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  const onSubmit = async () => {
-    if (mode === "create") {
-      toast("이벤트가 생성되었습니다");
-      router.push("/protected/events");
-    } else {
-      toast("이벤트가 수정되었습니다");
-      router.back();
+  const onSubmit = (data: EventFormValues) => {
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("location", data.location);
+    formData.append("eventDate", data.eventDate);
+    if (data.description) formData.append("description", data.description);
+
+    const file = fileInputRef.current?.files?.[0];
+    if (file && file.size > 0) {
+      formData.append("coverImage", file);
     }
+    if (removeImage) {
+      formData.append("removeImage", "true");
+    }
+
+    startTransition(() => {
+      formAction(formData);
+    });
   };
 
   return (
@@ -88,7 +107,7 @@ export default function EventForm({
             <button
               type="button"
               onClick={handleRemoveImage}
-              className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition-opacity hover:bg-black/70"
+              className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white transition-opacity hover:bg-black/70"
               aria-label="이미지 제거"
             >
               <X size={14} />
@@ -156,13 +175,24 @@ export default function EventForm({
         />
       </div>
 
+      {/* 서버 에러 메시지 */}
+      {state.message && !state.success && (
+        <p className="text-sm text-destructive">{state.message}</p>
+      )}
+
       {/* 제출 버튼 */}
       <Button
         type="submit"
         className="w-full bg-emerald-500 hover:bg-emerald-600"
-        disabled={isSubmitting}
+        disabled={isPending}
       >
-        {mode === "create" ? "이벤트 만들기" : "수정 완료"}
+        {isPending
+          ? mode === "create"
+            ? "생성 중..."
+            : "수정 중..."
+          : mode === "create"
+            ? "이벤트 만들기"
+            : "수정 완료"}
       </Button>
     </form>
   );
