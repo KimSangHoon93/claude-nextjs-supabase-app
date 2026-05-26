@@ -14,6 +14,102 @@ export type Database = {
   };
   public: {
     Tables: {
+      event_participants: {
+        Row: {
+          event_id: string;
+          id: string;
+          joined_at: string;
+          role: string;
+          user_id: string;
+        };
+        Insert: {
+          event_id: string;
+          id?: string;
+          joined_at?: string;
+          role?: string;
+          user_id: string;
+        };
+        Update: {
+          event_id?: string;
+          id?: string;
+          joined_at?: string;
+          role?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "event_participants_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "event_participants_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events_with_count";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "event_participants_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      events: {
+        Row: {
+          cover_image_url: string | null;
+          created_at: string;
+          created_by: string;
+          description: string | null;
+          event_date: string;
+          id: string;
+          invite_code: string;
+          location: string;
+          status: string;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          cover_image_url?: string | null;
+          created_at?: string;
+          created_by: string;
+          description?: string | null;
+          event_date: string;
+          id?: string;
+          invite_code: string;
+          location: string;
+          status?: string;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          cover_image_url?: string | null;
+          created_at?: string;
+          created_by?: string;
+          description?: string | null;
+          event_date?: string;
+          id?: string;
+          invite_code?: string;
+          location?: string;
+          status?: string;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "events_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -22,6 +118,7 @@ export type Database = {
           email: string | null;
           full_name: string | null;
           id: string;
+          role: string;
           updated_at: string;
           username: string | null;
           website: string | null;
@@ -33,6 +130,7 @@ export type Database = {
           email?: string | null;
           full_name?: string | null;
           id: string;
+          role?: string;
           updated_at?: string;
           username?: string | null;
           website?: string | null;
@@ -44,6 +142,7 @@ export type Database = {
           email?: string | null;
           full_name?: string | null;
           id?: string;
+          role?: string;
           updated_at?: string;
           username?: string | null;
           website?: string | null;
@@ -52,10 +151,34 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      events_with_count: {
+        Row: {
+          cover_image_url: string | null;
+          created_at: string | null;
+          created_by: string | null;
+          description: string | null;
+          event_date: string | null;
+          id: string | null;
+          invite_code: string | null;
+          location: string | null;
+          participant_count: number | null;
+          status: string | null;
+          title: string | null;
+          updated_at: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "events_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Functions: {
-      [_ in never]: never;
+      is_admin_user: { Args: never; Returns: boolean };
     };
     Enums: {
       [_ in never]: never;
