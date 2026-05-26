@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { translateAuthError } from "@/lib/supabase/auth-errors";
 
 export function SignUpForm({
   className,
@@ -39,7 +40,7 @@ export function SignUpForm({
       },
     });
     if (error) {
-      setError(error.message);
+      setError(translateAuthError(error.message));
       setIsLoading(false);
     }
   };
@@ -51,13 +52,13 @@ export function SignUpForm({
     setError(null);
 
     if (password !== repeatPassword) {
-      setError("Passwords do not match");
+      setError("비밀번호가 일치하지 않습니다");
       setIsLoading(false);
       return;
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -65,9 +66,18 @@ export function SignUpForm({
         },
       });
       if (error) throw error;
+      // 이미 가입된 이메일: Supabase가 에러 없이 빈 identities 반환
+      if (data.user?.identities?.length === 0) {
+        setError("이미 가입된 이메일 주소입니다");
+        return;
+      }
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(
+        error instanceof Error
+          ? translateAuthError(error.message)
+          : "오류가 발생했습니다",
+      );
     } finally {
       setIsLoading(false);
     }

@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { translateAuthError } from "@/lib/supabase/auth-errors";
 
 function getSafeNext(next: string | null): string {
   if (next && next.startsWith("/") && !next.startsWith("//")) {
@@ -51,7 +52,9 @@ function LoginFormInner({
       router.push(safeNext);
     } catch (error: unknown) {
       setError(
-        error instanceof Error ? error.message : "로그인에 실패했습니다.",
+        error instanceof Error
+          ? translateAuthError(error.message)
+          : "로그인에 실패했습니다",
       );
     } finally {
       setIsLoading(false);
@@ -71,7 +74,7 @@ function LoginFormInner({
       },
     });
     if (error) {
-      setError(error.message);
+      setError(translateAuthError(error.message));
       setIsLoading(false);
     }
   };
