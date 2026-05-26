@@ -56,7 +56,7 @@ export default function AdminDashboardPage() {
 
       {/* KPI 섹션 1: 이벤트 지표 */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
           이벤트
         </h2>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -116,7 +116,7 @@ export default function AdminDashboardPage() {
 
       {/* KPI 섹션 2: 사용자 지표 */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
           사용자
         </h2>
         <div className="grid grid-cols-3 gap-4">
@@ -163,7 +163,7 @@ export default function AdminDashboardPage() {
 
       {/* 최근 이벤트 테이블 */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
           최근 이벤트
         </h2>
         <Card>
