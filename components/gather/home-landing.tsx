@@ -3,7 +3,6 @@
 import { CalendarDays, Link2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const FEATURES = [
@@ -24,13 +23,8 @@ const FEATURES = [
   },
 ];
 
-interface HomeLandingProps {
-  isLoggedIn: boolean;
-}
-
-export default function HomeLanding({ isLoggedIn }: HomeLandingProps) {
+export default function HomeLanding() {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -42,10 +36,6 @@ export default function HomeLanding({ isLoggedIn }: HomeLandingProps) {
       },
     });
     if (error) setIsLoading(false);
-  };
-
-  const handleGoToEvents = () => {
-    router.push("/protected/events");
   };
 
   return (
@@ -75,22 +65,13 @@ export default function HomeLanding({ isLoggedIn }: HomeLandingProps) {
       </div>
 
       {/* CTA 버튼 */}
-      {isLoggedIn ? (
-        <Button
-          className="mb-4 w-full bg-[#5B6EF5] py-6 text-base font-semibold hover:bg-[#4a5de4]"
-          onClick={handleGoToEvents}
-        >
-          내 이벤트 보기
-        </Button>
-      ) : (
-        <Button
-          className="mb-4 w-full bg-[#5B6EF5] py-6 text-base font-semibold hover:bg-[#4a5de4]"
-          onClick={handleGoogleLogin}
-          disabled={isLoading}
-        >
-          {isLoading ? "잠시 기다려주세요..." : "Google로 시작하기"}
-        </Button>
-      )}
+      <Button
+        className="mb-4 w-full bg-[#5B6EF5] py-6 text-base font-semibold hover:bg-[#4a5de4]"
+        onClick={handleGoogleLogin}
+        disabled={isLoading}
+      >
+        {isLoading ? "잠시 기다려주세요..." : "Google로 시작하기"}
+      </Button>
 
       {/* 하단 설명 */}
       <p className="text-center text-xs text-muted-foreground">

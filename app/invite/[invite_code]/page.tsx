@@ -3,10 +3,12 @@ import { CalendarDays, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
 import {
   getMockEventByInviteCode,
   getMockParticipantsByEventId,
 } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
 import type { EventStatus } from "@/types/gather";
 
 // 더미 데이터 사용 중 — Phase 3에서 DB 연동으로 교체 예정
@@ -65,6 +67,12 @@ export default async function InvitePage({ params }: InvitePageProps) {
   const event = getMockEventByInviteCode(invite_code);
   if (!event) notFound();
 
+  // 로그인 여부 확인 (로그인 복귀 플로우용)
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // 참여자 목록 조회
   const participants = getMockParticipantsByEventId(event.id);
   const gradient = pickGradient(event.id);
@@ -91,7 +99,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
         {/* 이벤트 제목 및 상태 */}
         <section className="space-y-3">
           <div className="flex items-start justify-between gap-2">
-            <h1 className="text-xl font-bold leading-tight">{event.title}</h1>
+            <h1 className="text-xl leading-tight font-bold">{event.title}</h1>
             <StatusBadge status={event.status} />
           </div>
 
@@ -126,16 +134,33 @@ export default async function InvitePage({ params }: InvitePageProps) {
 
       {/* 하단 CTA 영역 — 참여 버튼 */}
       <div className="border-t px-4 py-4">
-        {/* Phase 3에서 실제 참여 로직으로 교체 예정 */}
-        <Button
-          size="lg"
-          className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
-        >
-          참여하기
-        </Button>
-        <p className="mt-2 text-center text-xs text-muted-foreground">
-          로그인 후 참여할 수 있어요
-        </p>
+        {user ? (
+          // 로그인 사용자 — Task 010에서 실제 참여 로직 연결
+          <Button
+            size="lg"
+            className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
+          >
+            참여하기
+          </Button>
+        ) : (
+          // 비로그인 사용자 — 로그인 후 이 페이지로 복귀
+          <>
+            <Link
+              href={`/auth/login?next=/invite/${invite_code}`}
+              className="block"
+            >
+              <Button
+                size="lg"
+                className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
+              >
+                로그인 후 참여하기
+              </Button>
+            </Link>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              로그인 후 참여할 수 있어요
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

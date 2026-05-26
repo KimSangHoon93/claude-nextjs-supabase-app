@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-export function LoginForm({
+function getSafeNext(next: string | null): string {
+  if (next && next.startsWith("/") && !next.startsWith("//")) {
+    return next;
+  }
+  return "/protected/events";
+}
+
+function LoginFormInner({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
@@ -25,6 +33,8 @@ export function LoginForm({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const safeNext = getSafeNext(searchParams.get("next"));
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,23 +48,26 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      router.push("/");
+      router.push(safeNext);
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(
+        error instanceof Error ? error.message : "로그인에 실패했습니다.",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 구글 OAuth 로그인 — 성공 시 페이지 이동하므로 isLoading 리셋 불필요
+  // 구글 OAuth 로그인 — next 파라미터를 callback URL에 포함
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setError(null);
     const supabase = createClient();
+    const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl,
       },
     });
     if (error) {
@@ -153,5 +166,16 @@ export function LoginForm({
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) {
+  return (
+    <Suspense>
+      <LoginFormInner className={className} {...props} />
+    </Suspense>
   );
 }
