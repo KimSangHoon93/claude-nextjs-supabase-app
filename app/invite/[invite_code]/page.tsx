@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { CalendarDays, MapPin, Users, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -64,12 +64,16 @@ export default async function InvitePage({ params }: InvitePageProps) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    redirect(`/auth/login?next=/invite/${invite_code}`);
+  }
+
   const event = await getEventByInviteCode(supabase, invite_code);
   if (!event) notFound();
 
   const [participants, alreadyJoined] = await Promise.all([
     getParticipantsByEventId(supabase, event.id),
-    user ? isParticipant(supabase, event.id, user.id) : Promise.resolve(false),
+    isParticipant(supabase, event.id, user.id),
   ]);
 
   const gradient = pickGradient(event.id);
@@ -131,50 +135,30 @@ export default async function InvitePage({ params }: InvitePageProps) {
 
       {/* 하단 CTA 영역 */}
       <div className="border-t px-4 py-4">
-        {user ? (
-          alreadyJoined ? (
-            // 이미 참여 중인 경우
-            <div className="space-y-2">
-              <div className="flex items-center justify-center gap-2 text-sm text-emerald-600">
-                <CheckCircle2 size={16} />
-                <span>이미 참여 중인 이벤트예요</span>
-              </div>
-              <Link href={`/protected/events/${event.id}`} className="block">
-                <Button size="lg" variant="outline" className="w-full">
-                  이벤트 보기
-                </Button>
-              </Link>
+        {alreadyJoined ? (
+          // 이미 참여 중인 경우
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2 text-sm text-emerald-600">
+              <CheckCircle2 size={16} />
+              <span>이미 참여 중인 이벤트예요</span>
             </div>
-          ) : (
-            // 로그인 사용자 — 참여하기
-            <form action={boundJoinAction}>
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
-              >
-                참여하기
-              </Button>
-            </form>
-          )
-        ) : (
-          // 비로그인 사용자 — 로그인 후 이 페이지로 복귀
-          <>
-            <Link
-              href={`/auth/login?next=/invite/${invite_code}`}
-              className="block"
-            >
-              <Button
-                size="lg"
-                className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
-              >
-                로그인 후 참여하기
+            <Link href={`/protected/events/${event.id}`} className="block">
+              <Button size="lg" variant="outline" className="w-full">
+                이벤트 보기
               </Button>
             </Link>
-            <p className="mt-2 text-center text-xs text-muted-foreground">
-              로그인 후 참여할 수 있어요
-            </p>
-          </>
+          </div>
+        ) : (
+          // 로그인 사용자 — 참여하기
+          <form action={boundJoinAction}>
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
+            >
+              참여하기
+            </Button>
+          </form>
         )}
       </div>
     </div>
