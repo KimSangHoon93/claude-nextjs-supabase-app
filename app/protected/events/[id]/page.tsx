@@ -11,13 +11,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import ParticipantCard from "@/components/gather/participant-card";
 import InviteCopyButton from "@/components/gather/invite-copy-button";
 import DeleteEventButton from "@/components/gather/delete-event-button";
+import RealtimeParticipants from "@/components/gather/realtime-participants";
 import { createClient } from "@/lib/supabase/server";
 import { getEventById } from "@/lib/supabase/events";
 import { getParticipantsByEventId } from "@/lib/supabase/participants";
-import { deleteEventAction } from "./actions";
+import { deleteEventAction, leaveEventAction } from "./actions";
 import type { EventStatus } from "@/types/gather";
 
 export const dynamic = "force-dynamic";
@@ -90,6 +90,7 @@ export default async function EventDetailPage({
 
   const gradient = pickGradient(event.id);
   const boundDeleteAction = deleteEventAction.bind(null, event.id);
+  const boundLeaveAction = leaveEventAction.bind(null, event.id);
 
   return (
     <div>
@@ -144,9 +145,10 @@ export default async function EventDetailPage({
               참여자 {participants.length}명
             </span>
           </div>
-          {participants.map((participant) => (
-            <ParticipantCard key={participant.id} participant={participant} />
-          ))}
+          <RealtimeParticipants
+            eventId={event.id}
+            initialParticipants={participants}
+          />
         </section>
 
         {/* 섹션3: 역할별 액션 */}
@@ -172,14 +174,16 @@ export default async function EventDetailPage({
                 <CheckCircle2 size={16} />
                 <span>참여 중인 이벤트입니다</span>
               </div>
-              <Button
-                variant="ghost"
-                disabled
-                className="w-full text-muted-foreground"
-              >
-                <LogOut size={16} className="mr-2" />
-                참여 취소
-              </Button>
+              <form action={boundLeaveAction}>
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  className="w-full text-muted-foreground hover:text-destructive"
+                >
+                  <LogOut size={16} className="mr-2" />
+                  참여 취소
+                </Button>
+              </form>
             </section>
           </>
         ) : null}
