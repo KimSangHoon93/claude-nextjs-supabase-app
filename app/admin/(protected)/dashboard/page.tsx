@@ -17,10 +17,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MOCK_ADMIN_STATS, MOCK_EVENTS } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
+import { getAdminStats, getRecentEvents } from "@/lib/supabase/admin";
 import type { EventStatus } from "@/types/gather";
 
-// 이벤트 상태 뱃지 — 기존 페이지 패턴 동일
+// 이벤트 상태 뱃지
 function StatusBadge({ status }: { status: EventStatus }) {
   if (status === "upcoming") return <Badge variant="secondary">예정</Badge>;
   if (status === "ongoing")
@@ -40,10 +41,14 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul",
 });
 
-export default function AdminDashboardPage() {
-  const stats = MOCK_ADMIN_STATS;
-  // 최근 이벤트 5개 (생성일 기준 최신순)
-  const recentEvents = MOCK_EVENTS.slice(0, 5);
+export default async function AdminDashboardPage() {
+  const supabase = await createClient();
+
+  // 실제 DB에서 통계 및 최근 이벤트 병렬 조회
+  const [stats, recentEvents] = await Promise.all([
+    getAdminStats(supabase),
+    getRecentEvents(supabase, 5),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -171,32 +176,40 @@ export default function AdminDashboardPage() {
             <CardTitle className="text-base">최근 등록된 이벤트</CardTitle>
           </CardHeader>
           <CardContent className="pt-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>이벤트명</TableHead>
-                  <TableHead>날짜</TableHead>
-                  <TableHead>장소</TableHead>
-                  <TableHead>상태</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentEvents.map((event) => (
-                  <TableRow key={event.id}>
-                    <TableCell className="font-medium">{event.title}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {dateFormatter.format(new Date(event.eventDate))}
-                    </TableCell>
-                    <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
-                      {event.location}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={event.status} />
-                    </TableCell>
+            {recentEvents.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                등록된 이벤트가 없습니다
+              </p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>이벤트명</TableHead>
+                    <TableHead>날짜</TableHead>
+                    <TableHead>장소</TableHead>
+                    <TableHead>상태</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {recentEvents.map((event) => (
+                    <TableRow key={event.id}>
+                      <TableCell className="font-medium">
+                        {event.title}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {dateFormatter.format(new Date(event.eventDate))}
+                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
+                        {event.location}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={event.status} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </section>

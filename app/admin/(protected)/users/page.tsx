@@ -1,12 +1,6 @@
-"use client";
-
-import { useMemo, useState } from "react";
-import { Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -15,8 +9,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MOCK_USERS } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
+import { getAdminUsers } from "@/lib/supabase/admin";
+import { UsersFilterForm } from "@/components/admin/users-filter-form";
+import { DeleteUserButton } from "@/components/admin/delete-user-button";
+import { AdminPagination } from "@/components/admin/admin-pagination";
 import type { UserRole } from "@/types/gather";
+
+const PAGE_SIZE = 20;
 
 // 역할 뱃지 — admin: 보라색, user: 기본
 function RoleBadge({ role }: { role: UserRole }) {
@@ -33,23 +33,33 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul",
 });
 
-// 이름에서 아바타 폴백 이니셜 추출 (첫 글자)
+// 이름 첫 글자 이니셜 추출 (빈 문자열 보호)
 function getInitial(name: string) {
-  return name.charAt(0);
+  return name.charAt(0) || "?";
 }
 
-export default function AdminUsersPage() {
-  // 검색어 상태
-  const [searchQuery, setSearchQuery] = useState("");
+interface SearchParams {
+  search?: string;
+  page?: string;
+}
 
-  // 이름 또는 이메일 기반 필터링
-  const filteredUsers = useMemo(() => {
-    if (!searchQuery) return MOCK_USERS;
-    return MOCK_USERS.filter(
-      (user) =>
-        user.name.includes(searchQuery) || user.email.includes(searchQuery),
-    );
-  }, [searchQuery]);
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
+  const search = params.search ?? "";
+  // NaN 방지: parseInt 후 유효성 검사
+  const parsedPage = parseInt(params.page ?? "1", 10);
+  const page = isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+
+  const supabase = await createClient();
+  const { users, total } = await getAdminUsers(supabase, {
+    search,
+    page,
+    pageSize: PAGE_SIZE,
+  });
 
   return (
     <div className="space-y-6">
@@ -62,18 +72,8 @@ export default function AdminUsersPage() {
 
       <Card>
         <CardHeader className="pb-4">
-          {/* 검색 영역 */}
-          <div className="flex items-center gap-3">
-            <Input
-              placeholder="이름 또는 이메일 검색..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-xs"
-            />
-            <span className="ml-auto text-sm text-muted-foreground">
-              {filteredUsers.length}명
-            </span>
-          </div>
+          {/* 검색 — Client Component */}
+          <UsersFilterForm defaultSearch={search} total={total} />
         </CardHeader>
 
         <CardContent className="pt-0">
@@ -88,7 +88,7 @@ export default function AdminUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.length === 0 ? (
+              {users.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={5}
@@ -98,7 +98,7 @@ export default function AdminUsersPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredUsers.map((user) => (
+                users.map((user) => (
                   <TableRow key={user.id}>
                     {/* 아바타 + 이름 */}
                     <TableCell>
@@ -128,24 +128,26 @@ export default function AdminUsersPage() {
                       {dateFormatter.format(new Date(user.createdAt))}
                     </TableCell>
 
-                    {/* TODO: Phase 3에서 삭제 로직 구현 */}
+                    {/* 삭제 — Client Component */}
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled
-                        className="text-destructive"
-                        aria-label="사용자 삭제"
-                      >
-                        <Trash2 size={14} className="mr-1" />
-                        삭제
-                      </Button>
+                      <DeleteUserButton userId={user.id} userName={user.name} />
                     </TableCell>
                   </TableRow>
                 ))
               )}
             </TableBody>
           </Table>
+
+          {/* 페이지네이션 */}
+          <AdminPagination
+            total={total}
+            page={page}
+            pageSize={PAGE_SIZE}
+            basePath="/admin/users"
+            currentParams={{
+              search: search || undefined,
+            }}
+          />
         </CardContent>
       </Card>
     </div>

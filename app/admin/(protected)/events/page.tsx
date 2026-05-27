@@ -1,18 +1,7 @@
-"use client";
-
-import { useMemo, useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -21,8 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MOCK_EVENTS } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
+import { getAdminEvents } from "@/lib/supabase/admin";
+import { EventsFilterForm } from "@/components/admin/events-filter-form";
+import { DeleteEventButton } from "@/components/admin/delete-event-button";
+import { AdminPagination } from "@/components/admin/admin-pagination";
 import type { EventStatus } from "@/types/gather";
+
+const PAGE_SIZE = 20;
 
 // 이벤트 상태 뱃지
 function StatusBadge({ status }: { status: EventStatus }) {
@@ -44,24 +39,32 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul",
 });
 
-export default function AdminEventsPage() {
-  // 검색어 상태
-  const [searchQuery, setSearchQuery] = useState("");
-  // 상태 필터 상태 ('all' | EventStatus)
-  const [statusFilter, setStatusFilter] = useState<"all" | EventStatus>("all");
+interface SearchParams {
+  search?: string;
+  status?: string;
+  page?: string;
+}
 
-  // 검색어 + 상태 필터 조합 — 클라이언트 사이드 필터링
-  const filteredEvents = useMemo(() => {
-    return MOCK_EVENTS.filter((event) => {
-      const matchesStatus =
-        statusFilter === "all" || event.status === statusFilter;
-      const matchesSearch =
-        searchQuery === "" ||
-        event.title.includes(searchQuery) ||
-        event.location.includes(searchQuery);
-      return matchesStatus && matchesSearch;
-    });
-  }, [searchQuery, statusFilter]);
+export default async function AdminEventsPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
+  const search = params.search ?? "";
+  const status =
+    (params.status as "all" | "upcoming" | "ongoing" | "ended") ?? "all";
+  // NaN 방지: parseInt 후 유효성 검사
+  const parsedPage = parseInt(params.page ?? "1", 10);
+  const page = isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+
+  const supabase = await createClient();
+  const { events, total } = await getAdminEvents(supabase, {
+    search,
+    status,
+    page,
+    pageSize: PAGE_SIZE,
+  });
 
   return (
     <div className="space-y-6">
@@ -74,33 +77,12 @@ export default function AdminEventsPage() {
 
       <Card>
         <CardHeader className="pb-4">
-          {/* 검색 및 필터 영역 */}
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Input
-              placeholder="이벤트명 또는 장소 검색..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="sm:max-w-xs"
-            />
-            <Select
-              value={statusFilter}
-              onValueChange={(v) => setStatusFilter(v as "all" | EventStatus)}
-            >
-              <SelectTrigger className="sm:w-36">
-                <SelectValue placeholder="상태 필터" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체</SelectItem>
-                <SelectItem value="upcoming">예정</SelectItem>
-                <SelectItem value="ongoing">진행중</SelectItem>
-                <SelectItem value="ended">종료</SelectItem>
-              </SelectContent>
-            </Select>
-            {/* 필터 결과 수 표시 */}
-            <CardTitle className="flex items-center text-sm font-normal text-muted-foreground sm:ml-auto">
-              {filteredEvents.length}개 이벤트
-            </CardTitle>
-          </div>
+          {/* 검색 및 필터 — Client Component */}
+          <EventsFilterForm
+            defaultSearch={search}
+            defaultStatus={status}
+            total={total}
+          />
         </CardHeader>
 
         <CardContent className="pt-0">
@@ -116,7 +98,7 @@ export default function AdminEventsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredEvents.length === 0 ? (
+              {events.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={6}
@@ -126,7 +108,7 @@ export default function AdminEventsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredEvents.map((event) => (
+                events.map((event) => (
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.title}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
@@ -141,9 +123,9 @@ export default function AdminEventsPage() {
                     <TableCell>
                       <StatusBadge status={event.status} />
                     </TableCell>
-                    {/* TODO: Phase 3에서 수정/삭제 로직 구현 */}
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        {/* 수정은 이번 Task 범위 외 */}
                         <Button
                           variant="outline"
                           size="sm"
@@ -153,16 +135,11 @@ export default function AdminEventsPage() {
                           <Pencil size={14} className="mr-1" />
                           수정
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled
-                          className="text-destructive"
-                          aria-label="이벤트 삭제"
-                        >
-                          <Trash2 size={14} className="mr-1" />
-                          삭제
-                        </Button>
+                        {/* 삭제 — Client Component */}
+                        <DeleteEventButton
+                          eventId={event.id}
+                          eventTitle={event.title}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -170,6 +147,18 @@ export default function AdminEventsPage() {
               )}
             </TableBody>
           </Table>
+
+          {/* 페이지네이션 */}
+          <AdminPagination
+            total={total}
+            page={page}
+            pageSize={PAGE_SIZE}
+            basePath="/admin/events"
+            currentParams={{
+              search: search || undefined,
+              status: status !== "all" ? status : undefined,
+            }}
+          />
         </CardContent>
       </Card>
     </div>
