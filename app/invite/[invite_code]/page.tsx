@@ -1,4 +1,6 @@
 import { notFound, redirect } from "next/navigation";
+import Image from "next/image";
+import type { Metadata } from "next";
 import { CalendarDays, MapPin, Users, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +14,38 @@ import {
 } from "@/lib/supabase/participants";
 import { joinEventAction } from "./actions";
 import type { EventStatus } from "@/types/gather";
+
+interface InvitePageProps {
+  params: Promise<{ invite_code: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: InvitePageProps): Promise<Metadata> {
+  const { invite_code } = await params;
+  const supabase = await createClient();
+  const event = await getEventByInviteCode(supabase, invite_code);
+
+  if (!event) return { title: "Gather 초대" };
+
+  const description =
+    event.description ?? `${event.location}에서 열리는 이벤트에 초대받았습니다`;
+
+  return {
+    title: `${event.title} — Gather 초대`,
+    description,
+    openGraph: {
+      title: `${event.title} — Gather 초대`,
+      description,
+      images: event.coverImageUrl ? [event.coverImageUrl] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${event.title} — Gather 초대`,
+      description,
+    },
+  };
+}
 
 export const dynamic = "force-dynamic";
 
@@ -52,10 +86,6 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   hour12: false,
 });
 
-interface InvitePageProps {
-  params: Promise<{ invite_code: string }>;
-}
-
 export default async function InvitePage({ params }: InvitePageProps) {
   const { invite_code } = await params;
 
@@ -83,12 +113,15 @@ export default async function InvitePage({ params }: InvitePageProps) {
     <div>
       {/* 커버 이미지 또는 그라데이션 플레이스홀더 */}
       {event.coverImageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={event.coverImageUrl}
-          alt={event.title}
-          className="h-48 w-full object-cover"
-        />
+        <div className="relative h-48 w-full">
+          <Image
+            src={event.coverImageUrl}
+            alt={event.title}
+            fill
+            className="object-cover"
+            sizes="100vw"
+          />
+        </div>
       ) : (
         <div
           className={`flex h-48 w-full items-center justify-center bg-gradient-to-br ${gradient}`}

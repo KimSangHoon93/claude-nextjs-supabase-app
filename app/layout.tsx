@@ -11,7 +11,21 @@ const defaultUrl = process.env.VERCEL_URL
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Gather - 소규모 이벤트 관리 플랫폼",
-  description: "이벤트 초대를 링크 하나로 간편하게",
+  description: "초대 링크 하나로 모든 것을 해결하는 일회성 이벤트 관리 플랫폼",
+  openGraph: {
+    type: "website",
+    siteName: "Gather",
+    title: "Gather - 소규모 이벤트 관리 플랫폼",
+    description:
+      "초대 링크 하나로 모든 것을 해결하는 일회성 이벤트 관리 플랫폼",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Gather - 소규모 이벤트 관리 플랫폼",
+    description:
+      "초대 링크 하나로 모든 것을 해결하는 일회성 이벤트 관리 플랫폼",
+  },
 };
 
 const geistSans = Geist({

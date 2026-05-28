@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, MapPin, User, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -57,13 +58,14 @@ export default function EventCard({ event, href }: EventCardLinkProps) {
       <Card className="overflow-hidden transition-shadow hover:shadow-md">
         <div className="flex">
           {/* 좌측 커버 이미지 */}
-          <div className="w-28 flex-shrink-0">
+          <div className="relative w-28 flex-shrink-0">
             {event.coverImageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={event.coverImageUrl}
                 alt={event.title}
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
+                sizes="112px"
               />
             ) : (
               <div

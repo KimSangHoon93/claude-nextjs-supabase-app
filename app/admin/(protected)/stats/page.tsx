@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getMonthlyEventStats, getWeeklyUserStats } from "@/lib/supabase/admin";
-import { StatsCharts } from "@/components/admin/stats-charts";
+// StatsChartsLoader: Client Component 래퍼 — ssr:false dynamic import 포함
+import { StatsChartsLoader } from "@/components/admin/stats-charts-loader";
 
 export default async function AdminStatsPage() {
   const supabase = await createClient();
@@ -20,8 +21,8 @@ export default async function AdminStatsPage() {
         </p>
       </div>
 
-      {/* 차트 — Client Component (Recharts SSR 불가) */}
-      <StatsCharts monthlyData={monthlyData} weeklyData={weeklyData} />
+      {/* 차트 — Client Component 래퍼 (dynamic import + ssr:false, Recharts SSR 불가) */}
+      <StatsChartsLoader monthlyData={monthlyData} weeklyData={weeklyData} />
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import {
   CalendarDays,
   MapPin,
@@ -21,6 +23,26 @@ import { deleteEventAction, leaveEventAction } from "./actions";
 import type { EventStatus } from "@/types/gather";
 
 export const dynamic = "force-dynamic";
+
+// 페이지 props 타입 — generateMetadata와 페이지 컴포넌트 모두에서 사용
+interface EventDetailPageProps {
+  params: Promise<{ id: string }>;
+}
+
+// 보호된 이벤트 상세 페이지 — 검색엔진 인덱싱 차단
+export async function generateMetadata({
+  params,
+}: EventDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const supabase = await createClient();
+  const event = await getEventById(supabase, id);
+
+  return {
+    title: event ? event.title : "이벤트",
+    description: event?.description ?? undefined,
+    robots: { index: false, follow: false },
+  };
+}
 
 const PLACEHOLDER_GRADIENTS = [
   "from-emerald-400 to-teal-500",
@@ -59,10 +81,6 @@ const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
   hour12: false,
 });
 
-interface EventDetailPageProps {
-  params: Promise<{ id: string }>;
-}
-
 export default async function EventDetailPage({
   params,
 }: EventDetailPageProps) {
@@ -96,12 +114,15 @@ export default async function EventDetailPage({
     <div>
       {/* 커버 이미지 */}
       {event.coverImageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={event.coverImageUrl}
-          alt={event.title}
-          className="h-48 w-full object-cover"
-        />
+        <div className="relative h-48 w-full">
+          <Image
+            src={event.coverImageUrl}
+            alt={event.title}
+            fill
+            className="object-cover"
+            sizes="100vw"
+          />
+        </div>
       ) : (
         <div
           className={`flex h-48 w-full items-center justify-center bg-gradient-to-br ${gradient}`}

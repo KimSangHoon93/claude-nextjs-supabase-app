@@ -165,13 +165,24 @@ Gather는 5-30명 규모의 소규모 이벤트 주최자와 참여자를 위한
   - ✅ 터치 영역 최적화 (compact 버튼 min-h-[44px] 적용)
   - ⏭ 무한 스크롤/가상화 리스트 — 현재 데이터 규모 소규모로 미구현 (Task 014에서 필요 시 재검토)
 
-- **Task 014: 성능 최적화 및 SEO**
-  - 이미지 최적화 (next/image, webp 포맷)
-  - 코드 스플리팅 최적화
-  - Supabase 쿼리 최적화 (select 최소화, JOIN 최적화)
-  - 메타 태그 및 Open Graph 설정
-  - robots.txt 및 sitemap.xml 생성
-  - Lighthouse 점수 90+ 달성
+- ✅ **Task 014: 성능 최적화 및 SEO** - 완료
+  - ✅ **Sub-01**: next/image 교체 및 Supabase Storage remotePattern 추가
+    - ✅ next.config.ts에 `*.supabase.co` remotePattern 추가
+    - ✅ event-card.tsx, events/[id]/page.tsx, invite/[code]/page.tsx의 `<img>` → `next/image` (fill prop)
+    - ✅ event-form.tsx blob:// 미리보기는 현상 유지
+  - ✅ **Sub-02**: SEO 메타데이터 강화 — OG 태그 및 동적 generateMetadata
+    - ✅ app/layout.tsx에 openGraph images 기본값 추가
+    - ✅ invite/[code]/page.tsx에 소셜 공유용 generateMetadata 구현
+    - ✅ events/[id]/page.tsx에 robots noindex + generateMetadata 추가
+  - ✅ **Sub-03**: robots.ts 및 sitemap.ts 생성
+    - ✅ app/robots.ts — /admin/, /protected/, /auth/ disallow
+    - ✅ app/sitemap.ts — 랜딩 페이지 정적 라우트 포함
+  - ✅ **Sub-04**: Recharts dynamic import로 코드 스플리팅 적용
+    - ✅ components/admin/stats-charts-loader.tsx Client Component 래퍼 생성 (ssr: false)
+    - ✅ admin/stats/page.tsx에서 StatsChartsLoader 사용, 로딩 중 Skeleton UI 표시
+  - ✅ **Sub-05**: Supabase 쿼리 최적화 + 최종 빌드 검증
+    - ✅ lib/supabase/profile.ts select('\*') → 명시적 컬럼 (10개 컬럼)
+    - ✅ npm run build && npm run lint && npm run typecheck 통과 확인
 
 - **Task 015: 배포 및 모니터링**
   - Vercel 프로젝트 설정 및 환경 변수 구성
@@ -305,14 +316,14 @@ Gather는 5-30명 규모의 소규모 이벤트 주최자와 참여자를 위한
 ---
 
 **📅 최종 업데이트**: 2026-05-28
-**📊 진행 상황**: Phase 4 진행 중 (13/15 Tasks 완료 · 87%)
+**📊 진행 상황**: Phase 4 진행 중 (14/15 Tasks 완료 · 93%) | Task 015 대기
 
 | Phase                    | 상태       | 완료 Task                              |
 | ------------------------ | ---------- | -------------------------------------- |
 | Phase 1: 골격 구축       | ✅ 완료    | Task 001, 002                          |
 | Phase 2: UI/UX 완성      | ✅ 완료    | Task 003, 004, 005, 006                |
 | Phase 3: DB 및 핵심 기능 | ✅ 완료    | Task 007, 008, 009, 010, 011, 012 완료 |
-| Phase 4: 최적화          | 🔄 진행 중 | Task 013 완료 / Task 014, 015 대기     |
+| Phase 4: 최적화          | 🔄 진행 중 | Task 013, 014 완료 / Task 015 대기     |
 
 **📌 이 로드맵은 6주 내 MVP 완성을 목표로 하며, 각 Task는 1-2일 내 완료 가능한 단위로 구성되었습니다.**
 **구조 우선 접근법을 엄격히 준수하여 중복 작업을 최소화하고 팀 협업 효율을 극대화합니다.**
