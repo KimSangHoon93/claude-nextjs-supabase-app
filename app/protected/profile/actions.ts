@@ -30,5 +30,6 @@ export async function updateProfileAction(
   }
 
   revalidatePath("/protected/profile");
+  revalidatePath("/protected/profile/edit");
   return { success: true };
 }
