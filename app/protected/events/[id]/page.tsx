@@ -110,83 +110,111 @@ export default async function EventDetailPage({
         </div>
       )}
 
-      <div className="space-y-6 p-4">
-        {/* 섹션1: 이벤트 정보 */}
-        <section className="space-y-3">
+      <div className="space-y-4 p-4">
+        {/* 제목 + 배지 + 설명 */}
+        <div className="space-y-1">
           <div className="flex items-start justify-between gap-2">
             <h1 className="text-xl leading-tight font-bold">{event.title}</h1>
             <StatusBadge status={event.status} />
           </div>
+          {event.description && (
+            <p className="text-sm text-muted-foreground">{event.description}</p>
+          )}
+        </div>
 
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <CalendarDays size={16} />
-              <span>{dateFormatter.format(new Date(event.eventDate))}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin size={16} />
-              <span>{event.location}</span>
-            </div>
-            {event.description && (
-              <p className="pt-1 leading-relaxed text-foreground/80">
-                {event.description}
+        {/* 호스트 액션 버튼 3열 */}
+        {isHost && (
+          <div className="grid grid-cols-3 gap-2">
+            <Button asChild variant="outline" size="sm" className="w-full">
+              <Link href={`/protected/events/${event.id}/edit`}>
+                <Pencil size={15} className="mr-1" />
+                수정
+              </Link>
+            </Button>
+            <InviteCopyButton inviteCode={event.inviteCode} compact />
+            <DeleteEventButton deleteAction={boundDeleteAction} compact />
+          </div>
+        )}
+
+        {/* 이벤트 정보 카드 */}
+        <div className="overflow-hidden rounded-xl border bg-card">
+          <div className="flex items-center gap-3 px-4 py-3">
+            <CalendarDays
+              size={16}
+              className="shrink-0 text-muted-foreground"
+            />
+            <div>
+              <p className="text-xs text-muted-foreground">날짜 및 시간</p>
+              <p className="text-sm font-medium">
+                {dateFormatter.format(new Date(event.eventDate))}
               </p>
-            )}
+            </div>
           </div>
-        </section>
-
-        <Separator />
-
-        {/* 섹션2: 참여자 목록 */}
-        <section className="space-y-1">
-          <div className="mb-2 flex items-center gap-2">
-            <Users size={16} className="text-muted-foreground" />
-            <span className="font-semibold">
-              참여자 {participants.length}명
-            </span>
+          <Separator />
+          <div className="flex items-center gap-3 px-4 py-3">
+            <MapPin size={16} className="shrink-0 text-muted-foreground" />
+            <div>
+              <p className="text-xs text-muted-foreground">장소</p>
+              <p className="text-sm font-medium">{event.location}</p>
+            </div>
           </div>
-          <RealtimeParticipants
-            eventId={event.id}
-            initialParticipants={participants}
-          />
-        </section>
+          <Separator />
+          <div className="flex items-center gap-3 px-4 py-3">
+            <Users size={16} className="shrink-0 text-muted-foreground" />
+            <div>
+              <p className="text-xs text-muted-foreground">참여자</p>
+              <p className="text-sm font-medium">
+                {participants.length}명 참여
+              </p>
+            </div>
+          </div>
+        </div>
 
-        {/* 섹션3: 역할별 액션 */}
-        {isHost ? (
-          <>
-            <Separator />
-            <section className="space-y-2">
-              <InviteCopyButton inviteCode={event.inviteCode} />
-              <Button asChild variant="outline" className="w-full">
-                <Link href={`/protected/events/${event.id}/edit`}>
-                  <Pencil size={16} className="mr-2" />
-                  이벤트 수정
-                </Link>
+        {/* 초대 코드 카드 (호스트만) */}
+        {isHost && (
+          <div className="space-y-1 rounded-xl border bg-card px-4 py-3">
+            <p className="text-sm text-muted-foreground">초대 코드</p>
+            <p className="font-mono text-lg font-bold tracking-wider">
+              {event.inviteCode}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              이 코드로 다른 사람을 초대할 수 있어요
+            </p>
+          </div>
+        )}
+
+        {/* 참여자 목록 카드 */}
+        <div className="overflow-hidden rounded-xl border bg-card">
+          <div className="px-4 pt-4 pb-1">
+            <h2 className="font-semibold">참여자 목록</h2>
+          </div>
+          <div className="divide-y px-4 pb-2">
+            <RealtimeParticipants
+              eventId={event.id}
+              initialParticipants={participants}
+            />
+          </div>
+        </div>
+
+        {/* 참여자 이탈 액션 */}
+        {isParticipant && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-emerald-600">
+              <CheckCircle2 size={16} />
+              <span>참여 중인 이벤트입니다</span>
+            </div>
+            <form action={boundLeaveAction}>
+              <Button
+                type="submit"
+                variant="ghost"
+                className="w-full text-muted-foreground hover:text-destructive"
+              >
+                <LogOut size={16} className="mr-2" />
+                참여 취소
               </Button>
-              <DeleteEventButton deleteAction={boundDeleteAction} />
-            </section>
-          </>
-        ) : isParticipant ? (
-          <>
-            <Separator />
-            <section className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-emerald-600">
-                <CheckCircle2 size={16} />
-                <span>참여 중인 이벤트입니다</span>
-              </div>
-              <form action={boundLeaveAction}>
-                <Button
-                  type="submit"
-                  variant="ghost"
-                  className="w-full text-muted-foreground hover:text-destructive"
-                >
-                  <LogOut size={16} className="mr-2" />
-                  참여 취소
-                </Button>
-              </form>
-            </section>
-          </>
-        ) : null}
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );

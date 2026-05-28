@@ -17,24 +17,38 @@ import {
 
 interface DeleteEventButtonProps {
   deleteAction: (formData: FormData) => Promise<void>;
+  compact?: boolean;
 }
 
 export default function DeleteEventButton({
   deleteAction,
+  compact,
 }: DeleteEventButtonProps) {
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          className="w-full text-destructive hover:text-destructive"
-          type="button"
-        >
-          <Trash2 size={16} className="mr-2" />
-          이벤트 삭제
-        </Button>
+        {compact ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-destructive hover:text-destructive"
+            type="button"
+          >
+            <Trash2 size={16} className="mr-1" />
+            삭제
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            className="w-full text-destructive hover:text-destructive"
+            type="button"
+          >
+            <Trash2 size={16} className="mr-2" />
+            이벤트 삭제
+          </Button>
+        )}
       </AlertDialogTrigger>
 
       <AlertDialogContent>
