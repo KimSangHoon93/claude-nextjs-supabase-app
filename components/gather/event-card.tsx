@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, MapPin, Users } from "lucide-react";
+import { CalendarDays, MapPin, User, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { EventStatus, GatherEvent } from "@/types/gather";
@@ -94,10 +94,18 @@ export default function EventCard({ event, href }: EventCardLinkProps) {
               <span className="truncate">{event.location}</span>
             </div>
 
-            {/* 참여자 수 */}
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Users size={13} />
-              <span>{event.participantCount}명</span>
+            {/* 주최자 + 참여자 수 */}
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <User size={13} />
+                <span className="truncate">
+                  {event.hostName ?? "알 수 없음"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Users size={13} />
+                <span>{event.participantCount}명</span>
+              </div>
             </div>
           </div>
         </div>

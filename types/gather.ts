@@ -28,6 +28,7 @@ export interface GatherEvent {
   inviteCode: string; // events.invite_code
   status: EventStatus; // events.status
   createdBy: string; // events.created_by
+  hostName?: string; // 주최자 이름 (profiles JOIN, 참여한 이벤트에서 사용)
   participantCount: number; // events_with_count.participant_count (집계값)
   createdAt: string; // events.created_at
   updatedAt: string; // events.updated_at

@@ -193,13 +193,18 @@ export async function getHostedEvents(
 
   const eventIds = participations.map((p) => p.event_id);
 
-  const { data } = await supabase
-    .from("events_with_count")
-    .select("*")
-    .in("id", eventIds)
-    .order("event_date", { ascending: false });
+  const [{ data }, { data: profile }] = await Promise.all([
+    supabase
+      .from("events_with_count")
+      .select("*")
+      .in("id", eventIds)
+      .order("event_date", { ascending: false }),
+    supabase.from("profiles").select("full_name").eq("id", userId).single(),
+  ]);
 
-  return (data ?? []).map(toGatherEvent);
+  const hostName = profile?.full_name ?? undefined;
+
+  return (data ?? []).map((row) => ({ ...toGatherEvent(row), hostName }));
 }
 
 export async function getJoinedEvents(
@@ -222,7 +227,21 @@ export async function getJoinedEvents(
     .in("id", eventIds)
     .order("event_date", { ascending: false });
 
-  return (data ?? []).map(toGatherEvent);
+  if (!data || data.length === 0) return [];
+
+  // 주최자 이름 일괄 조회
+  const hostIds = [...new Set(data.map((e) => e.created_by!))];
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .in("id", hostIds);
+
+  const profileMap = new Map((profiles ?? []).map((p) => [p.id, p.full_name]));
+
+  return data.map((row) => ({
+    ...toGatherEvent(row),
+    hostName: profileMap.get(row.created_by!) ?? undefined,
+  }));
 }
 
 export async function getEventByInviteCode(
