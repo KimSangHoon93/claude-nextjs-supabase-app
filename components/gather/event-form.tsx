@@ -1,9 +1,16 @@
 "use client";
 
-import { useActionState, useRef, useState, startTransition } from "react";
+import {
+  useActionState,
+  useRef,
+  useState,
+  startTransition,
+  useEffect,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImagePlus, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +43,15 @@ export default function EventForm({
   const [removeImage, setRemoveImage] = useState(false);
 
   const [state, formAction, isPending] = useActionState(action, initialState);
+
+  useEffect(() => {
+    if (!state.message) return;
+    if (state.success) {
+      toast.success(state.message);
+    } else {
+      toast.error(state.message);
+    }
+  }, [state]);
 
   const {
     register,
@@ -174,11 +190,6 @@ export default function EventForm({
           {...register("description")}
         />
       </div>
-
-      {/* 서버 에러 메시지 */}
-      {state.message && !state.success && (
-        <p className="text-sm text-destructive">{state.message}</p>
-      )}
 
       {/* 제출 버튼 */}
       <Button
