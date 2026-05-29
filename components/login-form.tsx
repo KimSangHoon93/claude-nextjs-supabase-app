@@ -58,6 +58,8 @@ function LoginFormInner({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEmailNotConfirmed, setIsEmailNotConfirmed] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
   const [webViewInfo, setWebViewInfo] = useState<WebViewInfo>({
     isWebView: false,
     isAndroid: false,
@@ -77,6 +79,8 @@ function LoginFormInner({
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
+    setIsEmailNotConfirmed(false);
+    setResendSuccess(false);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -87,13 +91,40 @@ function LoginFormInner({
       router.refresh();
       router.push(safeNext);
     } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "로그인에 실패했습니다";
+      if (message === "Email not confirmed") {
+        setIsEmailNotConfirmed(true);
+      }
       setError(
         error instanceof Error
-          ? translateAuthError(error.message)
+          ? translateAuthError(message)
           : "로그인에 실패했습니다",
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    const supabase = createClient();
+    setIsLoading(true);
+    setResendSuccess(false);
+
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/confirm?next=/auth/setup-profile`,
+      },
+    });
+
+    setIsLoading(false);
+    if (error) {
+      setError(translateAuthError(error.message));
+    } else {
+      setResendSuccess(true);
+      setError(null);
     }
   };
 
@@ -265,6 +296,23 @@ function LoginFormInner({
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
+              {isEmailNotConfirmed && (
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={handleResendConfirmation}
+                    disabled={isLoading}
+                    className="text-sm text-primary underline underline-offset-4 disabled:opacity-50"
+                  >
+                    인증 메일 재발송
+                  </button>
+                  {resendSuccess && (
+                    <p className="text-sm text-green-600">
+                      인증 메일을 발송했습니다. 이메일을 확인해 주세요.
+                    </p>
+                  )}
+                </div>
+              )}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "로그인 중..." : "로그인"}
               </Button>
