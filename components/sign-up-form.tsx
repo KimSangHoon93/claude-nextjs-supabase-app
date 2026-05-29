@@ -62,7 +62,7 @@ export function SignUpForm({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/setup-profile`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/auth/setup-profile`,
         },
       });
       if (error) throw error;
@@ -73,11 +73,16 @@ export function SignUpForm({
       }
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
-      setError(
-        error instanceof Error
-          ? translateAuthError(error.message)
-          : "오류가 발생했습니다",
-      );
+      const status = (error as { status?: number })?.status;
+      if (status === 429) {
+        setError("이메일 전송 횟수를 초과했습니다. 잠시 후 다시 시도해주세요");
+      } else {
+        setError(
+          error instanceof Error
+            ? translateAuthError(error.message)
+            : "오류가 발생했습니다",
+        );
+      }
     } finally {
       setIsLoading(false);
     }

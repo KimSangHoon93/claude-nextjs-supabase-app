@@ -84,6 +84,7 @@ function LoginFormInner({
         password,
       });
       if (error) throw error;
+      router.refresh();
       router.push(safeNext);
     } catch (error: unknown) {
       setError(
