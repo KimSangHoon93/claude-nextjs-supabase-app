@@ -18,20 +18,29 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { translateAuthError } from "@/lib/supabase/auth-errors";
 
-// 카카오톡, 라인, 인스타그램 등 인앱 브라우저 감지
-function detectWebView(): boolean {
-  if (typeof window === "undefined") return false;
+interface WebViewInfo {
+  isWebView: boolean;
+  isAndroid: boolean;
+  isIOS: boolean;
+}
+
+// 카카오톡, 라인, 인스타그램 등 인앱 브라우저 감지 및 플랫폼 정보 반환
+function detectWebViewInfo(): WebViewInfo {
+  if (typeof window === "undefined")
+    return { isWebView: false, isAndroid: false, isIOS: false };
   const ua = navigator.userAgent;
-  return (
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isWebView =
     /KAKAOTALK/i.test(ua) ||
     /Line\//i.test(ua) ||
     /Instagram/i.test(ua) ||
     /FBAN|FBAV/i.test(ua) ||
     /NaverApp/i.test(ua) ||
     /Twitter/i.test(ua) ||
-    (/Android/.test(ua) && /wv/.test(ua)) ||
-    /WebView/i.test(ua)
-  );
+    (isAndroid && /wv/.test(ua)) ||
+    /WebView/i.test(ua);
+  return { isWebView, isAndroid, isIOS };
 }
 
 function getSafeNext(next: string | null): string {
@@ -49,13 +58,18 @@ function LoginFormInner({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isInWebView, setIsInWebView] = useState(false);
+  const [webViewInfo, setWebViewInfo] = useState<WebViewInfo>({
+    isWebView: false,
+    isAndroid: false,
+    isIOS: false,
+  });
+  const [urlCopied, setUrlCopied] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const safeNext = getSafeNext(searchParams.get("next"));
 
   useEffect(() => {
-    setIsInWebView(detectWebView());
+    setWebViewInfo(detectWebViewInfo());
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -100,6 +114,20 @@ function LoginFormInner({
     }
   };
 
+  // Android: intent URL로 Chrome 강제 실행, iOS: 클립보드 복사
+  const handleOpenInBrowser = async () => {
+    const currentUrl = window.location.href;
+    if (webViewInfo.isAndroid) {
+      const host = currentUrl.replace(/^https?:\/\//, "");
+      const fallback = encodeURIComponent(currentUrl);
+      window.location.href = `intent://${host}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${fallback};end`;
+    } else {
+      await navigator.clipboard.writeText(currentUrl);
+      setUrlCopied(true);
+      setTimeout(() => setUrlCopied(false), 3000);
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -112,20 +140,66 @@ function LoginFormInner({
         <CardContent>
           {/* 소셜 로그인 섹션 */}
           <div className="flex flex-col gap-4">
-            {isInWebView ? (
-              /* 인앱 브라우저 경고 — Google OAuth 차단됨 */
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm dark:border-amber-800 dark:bg-amber-950">
-                <p className="font-semibold text-amber-800 dark:text-amber-200">
-                  Google 로그인을 사용하려면
-                </p>
-                <p className="mt-1 text-amber-700 dark:text-amber-300">
-                  현재 앱 내 브라우저에서는 Google 로그인이 지원되지 않습니다.
-                  주소창 우측 메뉴(⋮)에서 <strong>Chrome으로 열기</strong> 또는{" "}
-                  <strong>기본 브라우저로 열기</strong>를 선택해 주세요.
-                </p>
-                <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
-                  이메일/비밀번호 로그인은 이 화면에서도 사용 가능합니다.
-                </p>
+            {webViewInfo.isWebView ? (
+              /* 인앱 브라우저 — Google OAuth 차단, 외부 브라우저 유도 */
+              <div className="flex flex-col gap-3">
+                {webViewInfo.isAndroid ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full gap-2"
+                    onClick={handleOpenInBrowser}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    Chrome으로 열기
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full gap-2"
+                    onClick={handleOpenInBrowser}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    {urlCopied ? "링크가 복사되었습니다!" : "링크 복사하기"}
+                  </Button>
+                )}
+
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                  {webViewInfo.isAndroid ? (
+                    <p>
+                      Google 로그인은 인앱 브라우저에서 지원되지 않습니다. 위
+                      버튼으로 Chrome에서 열거나, 하단 <strong>···</strong> 메뉴
+                      → <strong>외부 브라우저로 열기</strong>를 이용하세요.
+                    </p>
+                  ) : (
+                    <p>
+                      Google 로그인은 인앱 브라우저에서 지원되지 않습니다.
+                      링크를 복사한 뒤 <strong>Safari</strong>에서 열거나, 하단{" "}
+                      <strong>···</strong> 메뉴 →{" "}
+                      <strong>기본 브라우저로 열기</strong>를 이용하세요.
+                    </p>
+                  )}
+                </div>
               </div>
             ) : (
               <Button
