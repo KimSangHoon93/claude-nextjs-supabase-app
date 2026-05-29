@@ -1,0 +1,44 @@
+# GitHub Actions CI 파이프라인
+# main 브랜치 push 또는 PR 시 lint → typecheck → build 순서로 자동 실행됩니다.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 소스 코드 체크아웃
+      - uses: actions/checkout@v4
+
+      # Node.js 20 설정 및 npm 캐시 활성화
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 의존성 설치 (npm ci는 Husky pre-commit hook을 CI에서 실행하지 않음)
+      - run: npm ci
+
+      # 1단계: ESLint 코드 품질 검사
+      - run: npm run lint
+
+      # 2단계: TypeScript 타입 체크
+      - run: npm run typecheck
+
+      # 3단계: Next.js 프로덕션 빌드 확인
+      - run: npm run build
+        env:
+          # Supabase 연결 정보 (필수)
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          # Google Analytics 측정 ID (선택)
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID }}
+          # Sentry 에러 모니터링 DSN (선택)
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
