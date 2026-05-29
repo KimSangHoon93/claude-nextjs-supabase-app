@@ -15,5 +15,5 @@ const AUTH_ERROR_MAP: Record<string, string> = {
 };
 
 export function translateAuthError(message: string): string {
-  return AUTH_ERROR_MAP[message] ?? "오류가 발생했습니다";
+  return AUTH_ERROR_MAP[message] ?? message ?? "오류가 발생했습니다";
 }

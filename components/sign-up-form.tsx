@@ -74,14 +74,11 @@ export function SignUpForm({
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       const status = (error as { status?: number })?.status;
+      const message = (error as { message?: string })?.message;
       if (status === 429) {
         setError("이메일 전송 횟수를 초과했습니다. 잠시 후 다시 시도해주세요");
       } else {
-        setError(
-          error instanceof Error
-            ? translateAuthError(error.message)
-            : "오류가 발생했습니다",
-        );
+        setError(message ? translateAuthError(message) : "오류가 발생했습니다");
       }
     } finally {
       setIsLoading(false);
