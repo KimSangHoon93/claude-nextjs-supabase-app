@@ -15,8 +15,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { translateAuthError } from "@/lib/supabase/auth-errors";
+
+// 카카오톡, 라인, 인스타그램 등 인앱 브라우저 감지
+function detectWebView(): boolean {
+  if (typeof window === "undefined") return false;
+  const ua = navigator.userAgent;
+  return (
+    /KAKAOTALK/i.test(ua) ||
+    /Line\//i.test(ua) ||
+    /Instagram/i.test(ua) ||
+    /FBAN|FBAV/i.test(ua) ||
+    /NaverApp/i.test(ua) ||
+    /Twitter/i.test(ua) ||
+    (/Android/.test(ua) && /wv/.test(ua)) ||
+    /WebView/i.test(ua)
+  );
+}
 
 function getSafeNext(next: string | null): string {
   if (next && next.startsWith("/") && !next.startsWith("//")) {
@@ -33,9 +49,14 @@ function LoginFormInner({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInWebView, setIsInWebView] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const safeNext = getSafeNext(searchParams.get("next"));
+
+  useEffect(() => {
+    setIsInWebView(detectWebView());
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,21 +112,38 @@ function LoginFormInner({
         <CardContent>
           {/* 소셜 로그인 섹션 */}
           <div className="flex flex-col gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full gap-2"
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-            >
-              <svg role="img" viewBox="0 0 24 24" className="h-4 w-4">
-                <path
-                  fill="currentColor"
-                  d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                />
-              </svg>
-              Google로 계속하기
-            </Button>
+            {isInWebView ? (
+              /* 인앱 브라우저 경고 — Google OAuth 차단됨 */
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm dark:border-amber-800 dark:bg-amber-950">
+                <p className="font-semibold text-amber-800 dark:text-amber-200">
+                  Google 로그인을 사용하려면
+                </p>
+                <p className="mt-1 text-amber-700 dark:text-amber-300">
+                  현재 앱 내 브라우저에서는 Google 로그인이 지원되지 않습니다.
+                  주소창 우측 메뉴(⋮)에서 <strong>Chrome으로 열기</strong> 또는{" "}
+                  <strong>기본 브라우저로 열기</strong>를 선택해 주세요.
+                </p>
+                <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                  이메일/비밀번호 로그인은 이 화면에서도 사용 가능합니다.
+                </p>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full gap-2"
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
+              >
+                <svg role="img" viewBox="0 0 24 24" className="h-4 w-4">
+                  <path
+                    fill="currentColor"
+                    d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                  />
+                </svg>
+                Google로 계속하기
+              </Button>
+            )}
 
             {/* 구분선 */}
             <div className="relative">
