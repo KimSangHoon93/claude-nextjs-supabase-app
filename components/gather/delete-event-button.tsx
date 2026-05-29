@@ -33,7 +33,7 @@ export default function DeleteEventButton({
           <Button
             variant="outline"
             size="sm"
-            className="min-h-[44px] w-full text-destructive hover:text-destructive"
+            className="w-full text-destructive hover:text-destructive"
             type="button"
           >
             <Trash2 size={16} className="mr-1" />

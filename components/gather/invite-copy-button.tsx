@@ -25,7 +25,7 @@ export default function InviteCopyButton({
         variant="outline"
         size="sm"
         onClick={handleCopy}
-        className="min-h-[44px] w-full"
+        className="w-full"
       >
         <Share2 size={16} className="mr-1" />
         공유
