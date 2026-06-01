@@ -2,9 +2,11 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { GoToAppButton } from "@/components/auth/go-to-app-button";
 
 export default function Page() {
   return (
@@ -22,10 +24,13 @@ export default function Page() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                회원가입이 완료되었습니다. 이메일을 확인하여 계정을 인증한 후
-                로그인해 주세요.
+                가입하신 이메일로 인증 메일이 발송되었습니다. 메일의 링크를
+                클릭하여 이메일 인증을 완료한 후 아래 버튼을 눌러 주세요.
               </p>
             </CardContent>
+            <CardFooter>
+              <GoToAppButton />
+            </CardFooter>
           </Card>
         </div>
       </div>
