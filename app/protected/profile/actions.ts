@@ -21,6 +21,7 @@ export async function updateProfileAction(
     full_name: (formData.get("full_name") as string) || null,
     website: (formData.get("website") as string) || null,
     bio: (formData.get("bio") as string) || null,
+    avatar_url: (formData.get("avatar_url") as string) || null,
   };
 
   const { error } = await updateProfile(supabase, user.id, data);

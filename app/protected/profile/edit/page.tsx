@@ -19,6 +19,9 @@ export default async function ProfileEditPage() {
   const { data: profile, error } = await getProfile(supabase, user.id);
   if (error || !profile) redirect("/auth/login");
 
+  // 구글 OAuth가 아닌 경우를 이메일 사용자로 처리
+  const isEmailUser = user.app_metadata?.provider !== "google";
+
   return (
     <div className="space-y-4 p-4">
       {/* 헤더 */}
@@ -32,7 +35,7 @@ export default async function ProfileEditPage() {
       </div>
 
       {/* 프로필 폼 */}
-      <ProfileForm profile={profile} />
+      <ProfileForm profile={profile} isEmailUser={isEmailUser} />
     </div>
   );
 }
